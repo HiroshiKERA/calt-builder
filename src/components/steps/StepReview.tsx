@@ -48,8 +48,8 @@ export function StepReview() {
     perTaskSettings: config.perTaskSettings,
   };
 
-  const taskCount =
-    config.selectedTasks.length + (customCfg ? 1 : 0);
+  // A blocked custom task is left out of the ZIP, so it is not counted either.
+  const taskCount = config.selectedTasks.length + (customCfg && !blocked ? 1 : 0);
   const firstFolder =
     config.selectedTasks[0] ?? (customCfg ? customFolderName(config.custom.name) : "task");
 
@@ -123,7 +123,7 @@ export function StepReview() {
           </AnimatePresence>
         </div>
         {(blocked || failed) && (
-          <p role="alert" className="relative mt-3 text-sm font-medium text-rose-600">
+          <p role="alert" className="relative mt-3 text-sm font-medium text-rose-700 dark:text-rose-300">
             {blocked ? t.review.downloadBlocked : t.review.downloadFailed}
           </p>
         )}

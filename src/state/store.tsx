@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { type BuildConfig, type LexerConfig, type ModelPreset, type ModelType, type PosEmbedding } from "../lib/codegen";
 import { defaultSelectedStats } from "../lib/stats";
-import { customNameIssue, type CustomNameIssue } from "../lib/names";
+import { customNameIssue, usesFallbackFolder, type CustomNameIssue } from "../lib/names";
 import { legacyTemplateRename } from "../lib/templates";
 import { renameTaskInCode } from "../lib/utils";
 
@@ -117,6 +117,11 @@ function loadPersisted(): Persisted {
     const config = { ...defaultConfig, ...saved.config, custom: { ...defaultConfig.custom, ...saved.config?.custom } };
     // A default name an earlier version used (and that now collides) is renamed
     // to its replacement, code included, so old sessions are not stuck.
+    // Code seeded for a name with no usable characters used to say `class Task`;
+    // the class for that fallback is now MyTask everywhere.
+    if (config.custom.code && usesFallbackFolder(config.custom.name) && !/\bclass\s+MyTask\b/.test(config.custom.code)) {
+      config.custom = { ...config.custom, code: config.custom.code.replace(/\bclass\s+Task\b/, "class MyTask") };
+    }
     const legacy = legacyTemplateRename(config.custom.name);
     if (legacy) {
       const code = config.custom.code;

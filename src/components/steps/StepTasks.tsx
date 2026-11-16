@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, Copy, Download, FileCode2, Pencil, Sigma, Sparkles } from "lucide-react";
 import { useWizard, hasSelection, customBuildConfig, customTaskIssue } from "../../state/store";
 import { customFolderName, usesFallbackFolder, type CustomNameIssue } from "../../lib/names";
@@ -341,8 +341,6 @@ function LexerEditor() {
 
 type CustomSection = "generator" | "tokenizer" | "measure";
 
-
-
 function CustomBuilder() {
   const { config, patchCustom } = useWizard();
   const t = useT();
@@ -382,17 +380,27 @@ function CustomBuilder() {
       code: cfg ? freshGeneratorCode(cfg) : null,
       lexer: defaultLexerConfig(id, {}),
     });
+    syncedName.current = newName;
   };
 
-  // Renaming the task must keep the seeded generator code in sync: the class name
-  // is derived from the task name, and scripts/generate.py imports that name.
-  const renameTask = (newName: string) => {
-    const code = config.custom.code;
-    patchCustom({
-      name: newName,
-      ...(code ? { code: renameTaskInCode(code, config.custom.name, newName) } : {}),
-    });
+  // Renaming the task must keep the generator code in sync: the class name is
+  // derived from the task name, and scripts/generate.py imports that name. The
+  // code is renamed once, when the name field loses focus (or this panel
+  // closes), from the name it was last synced to. Renaming on every keystroke
+  // made each intermediate name ("Helper" on the way to "Helpers") rewrite any
+  // class of that name in the user's code.
+  const syncedName = useRef(config.custom.name);
+  const latest = useRef({ config, patchCustom });
+  latest.current = { config, patchCustom };
+  const syncCode = () => {
+    const { config: c, patchCustom: patch } = latest.current;
+    const from = syncedName.current;
+    const to = c.custom.name;
+    if (from !== to && c.custom.code) patch({ code: renameTaskInCode(c.custom.code, from, to) });
+    syncedName.current = to;
   };
+  useEffect(() => syncCode, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const renameTask = (newName: string) => patchCustom({ name: newName });
   const activeTpl = getTemplate(config.custom.templateId);
   const nameIssue = customTaskIssue(config);
 
@@ -438,16 +446,17 @@ function CustomBuilder() {
             value={config.custom.name}
             placeholder={t.tasks.customNamePlaceholder}
             onChange={(e) => renameTask(e.target.value)}
+            onBlur={syncCode}
             aria-invalid={!!nameIssue}
             aria-describedby={nameIssue || usesFallbackFolder(config.custom.name) ? "custom-name-help" : undefined}
           />
           {nameIssue ? (
-            <p id="custom-name-help" className="mt-1.5 text-xs font-medium leading-snug text-rose-500">
+            <p id="custom-name-help" className="mt-1.5 text-xs font-medium leading-snug text-rose-700 dark:text-rose-400">
               {nameIssueText(t, nameIssue, config.custom.name)}
             </p>
           ) : usesFallbackFolder(config.custom.name) ? (
-            <p id="custom-name-help" className="mt-1.5 text-xs leading-snug text-ink-400">
-              {t.tasks.nameFallback}
+            <p id="custom-name-help" className="mt-1.5 text-xs leading-snug text-ink-500">
+              {config.custom.name.trim() ? t.tasks.nameFallback : t.tasks.nameFallbackEmpty}
             </p>
           ) : null}
           <p className="mt-1.5 hidden text-xs leading-snug text-ink-400 lg:block">
@@ -610,7 +619,7 @@ export function StepTasks() {
 
       <p className="mb-4 text-xs leading-relaxed text-ink-400">{t.tasks.sageNote}</p>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {TASKS.map((task) => {
           const active = config.selectedTasks.includes(task.id);
           const meta = items[task.id] ?? { name: task.id, summary: "" };
@@ -660,7 +669,7 @@ export function StepTasks() {
 
       {/* Shown even when the custom panel is collapsed, so a disabled Continue is never unexplained. */}
       {customIssue && (
-        <p role="alert" className="mt-6 rounded-xl bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-600 ring-1 ring-rose-500/25">
+        <p role="status" aria-live="polite" className="mt-6 rounded-xl bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-700 ring-1 ring-rose-500/25 dark:text-rose-300">
           {t.tasks.customNameAlert(nameIssueText(t, customIssue, config.custom.name))}
         </p>
       )}

@@ -21,15 +21,24 @@ export function toSnakeCase(input: string): string {
   return /^[0-9]/.test(cleaned) ? `task_${cleaned}` : cleaned;
 }
 
-/** Derive a PascalCase class name from a task name, e.g. "my_task" -> "MyTask". */
+/**
+ * Derive a PascalCase class name from a task name, e.g. "my_task" -> "MyTask".
+ * Names with no usable characters use the same my_task fallback as the folder,
+ * so an empty name gives MyTask everywhere (the ZIP passes `name || "my_task"`).
+ */
 export function toGeneratorClassName(taskName: string): string {
-  const snake = toSnakeCase(taskName) || "task";
+  const snake = toSnakeCase(taskName) || "my_task";
   const pascal = snake
     .split("_")
     .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join("");
   return pascal || "Task";
+}
+
+/** Text safe to put inside a Python triple-quoted docstring (backslashes, triple quotes). */
+export function pyDocText(text: string): string {
+  return text.replace(/\\/g, "\\\\").replace(/"""/g, '\\"\\"\\"');
 }
 
 /**
@@ -56,8 +65,8 @@ export function renameTaskInCode(code: string, oldName: string, newName: string)
   }
 
   // Header comment: "...pairs for the <name> task." (literal replace, no regex).
-  const oldDisplay = oldName.trim() || "my_task";
-  const newDisplay = newName.trim() || "my_task";
+  const oldDisplay = pyDocText(oldName.trim() || "my_task");
+  const newDisplay = pyDocText(newName.trim() || "my_task");
   if (oldDisplay !== newDisplay) {
     out = out.split(`for the ${oldDisplay} task`).join(`for the ${newDisplay} task`);
   }

@@ -72,7 +72,7 @@ export function StepWelcome() {
             </div>
           </label>
           {error ? (
-            <p id="project-name-help" role="alert" className="mt-2 text-left text-xs font-medium text-rose-500">{error}</p>
+            <p id="project-name-help" role="alert" className="mt-2 text-left text-xs font-medium text-rose-700 dark:text-rose-400">{error}</p>
           ) : config.projectName ? (
             <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400 [overflow-wrap:anywhere]">{t.welcome.namedAs(toSnakeCase(config.projectName))}</p>
           ) : (

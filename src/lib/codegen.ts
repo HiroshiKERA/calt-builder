@@ -4,7 +4,7 @@
 
 import { getTemplate, type ParamValues } from "./templates";
 import { STATS } from "./stats";
-import { toGeneratorClassName } from "./utils";
+import { pyDocText, toGeneratorClassName } from "./utils";
 import { customFolderName } from "./names";
 
 export type ModelPreset = "small" | "medium" | "large";
@@ -116,7 +116,7 @@ function generatorPy(cfg: BuildConfig, className: string): string {
     return cfg.customGeneratorCode.replace(/\s*$/, "") + "\n";
   }
   const header = `"""
-Generate (problem, answer) pairs for the ${cfg.taskName} task.
+Generate (problem, answer) pairs for the ${pyDocText(cfg.taskName)} task.
 
 Input  : ${t.exampleInput}
 Output : ${t.exampleOutput}
@@ -173,7 +173,7 @@ function metricsPy(cfg: BuildConfig): string {
     : "";
 
   return `"""
-Per-sample statistics and the success metric for the ${cfg.taskName} task.
+Per-sample statistics and the success metric for the ${pyDocText(cfg.taskName)} task.
 
   instance_stats  -> passed to DatasetPipeline as its 'statistics_calculator';
                      called once per generated sample. The aggregated values
@@ -213,7 +213,7 @@ __all__ = [
 
 function trainPy(cfg: BuildConfig): string {
   return `"""
-Training runner for the ${cfg.taskName} task.
+Training runner for the ${pyDocText(cfg.taskName)} task.
 
 Plain-text storage ("input # output" per line) means CALT's default text loader
 handles parsing, so no custom preprocessor is needed.
@@ -361,7 +361,9 @@ function taskImports(snake: string, lines: string[]): string {
   return `try:
 ${lines.map((l) => `    ${l}`).join("\n")}
 except ModuleNotFoundError as err:
-    if not (err.name or "").startswith("${snake}."):
+    # Only the task's own modules: a missing third-party import, or a missing
+    # helper file inside the task, is a different problem and is re-raised.
+    if err.name not in ("${snake}.core", ${lines.map((l) => `"${l.split(" ")[1]}"`).join(", ")}):
         raise
     sys.exit(
         f"Cannot import the task package '${snake}' ({err}). Its folder name clashes "

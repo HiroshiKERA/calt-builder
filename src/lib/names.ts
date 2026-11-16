@@ -52,22 +52,42 @@ const KEYWORDS = new Set(
 
 /**
  * Top-level modules in calt-env: everything a fresh `pip install calt-x matplotlib
- * click` brings in (listed from a clean Python 3.12 env), plus SageMath and a few
- * common extras. Packages a user installs later can still clash; the generated
+ * click` brings in (listed from a clean Python 3.12 env), everything the README's
+ * `conda create -c conda-forge sage python=3.12` env contains (listed from a real
+ * one), and a few common extras. Packages a user installs later can still clash; the generated
  * scripts then stop with a message that names the clash (see codegen.ts).
  */
 const PACKAGES = new Set(
   `
-  accelerate annotated_doc annotated_types anyio asttokens calt certifi charset_normalizer click
-  cloudpickle contourpy coreweave_evaluations cycler datasets dateutil distro distutils executing
-  filelock fsspec functorch google h11 hf_xet httpcore httpcore2 httpx httpx2 huggingface_hub idna
-  ipython ipython_pygments_lexers isympy jedi jinja2 joblib kiwisolver markdown_it markupsafe
-  matplotlib matplotlib_inline mdurl mpmath networkx numpy nvidia omegaconf packaging pandas parso
-  pexpect pip pkg_resources platformdirs prompt_toolkit psutil ptyprocess pure_eval pydantic
-  pydantic_core pygments pylab pyparsing regex requests rich safetensors sage scipy setuptools
-  shellingham sniffio stack_data sympy tokenizers torch torchgen tqdm traitlets transformers
-  triton truststore typer typing_extensions typing_inspection tzdata urllib3 wandb wcwidth wheel
-  xxhash yaml
+  accelerate alabaster annotated_doc annotated_types antlr4 anyio argon2 arrow asttokens async_lru
+  attr attrs babel backrefs beniget bleach boto3 botocore brotli bs4 cached_property calt certifi
+  cffi charset_normalizer click cloudpickle colorama colorlog comm contourpy conway_polynomials
+  coreweave_evaluations cvxopt cycler cypari2 cysignals cython datasets dateutil debugpy decorator
+  defusedxml distro distutils docstring_parser docutils dotenv exceptiongroup executing
+  fastjsonschema filelock fpylll fqdn fsspec functorch future gast ghp_import git gitdb gmpy2
+  google griffe h11 h2 hf_xet hjson hpack httpcore httpcore2 httpx httpx2 httpx_sse
+  huggingface_hub hyperframe idna imagesize importlib_metadata importlib_resources ipykernel
+  ipykernel_launcher ipython ipython_pygments_lexers ipywidgets isoduration isympy jedi jinja2
+  jmespath joblib json5 jsonpointer jsonschema jsonschema_specifications jupyter jupyter_client
+  jupyter_core jupyter_events jupyter_lsp jupyter_server jupyter_server_terminals jupyterlab
+  jupyterlab_pygments jupyterlab_server jupyterlab_widgets kiwisolver libfuturize libpasteurize
+  lrcalc markdown markdown_it markdownify markupsafe material materialx matplotlib
+  matplotlib_inline mcp mdformat mdurl mdx_math memory_allocator mergedeep mike mistune mkdocs
+  mkdocs_autorefs mkdocs_get_deps mkdocs_llmstxt mkdocs_macros mkdocstrings mpmath multipart
+  munkres nbclient nbconvert nbformat nest_asyncio networkx notebook notebook_shim numpy nvidia
+  omegaconf omp overrides packaging paginate pandas pandocfilters parso past pathspec pexpect
+  pickleshare pip pkg_resources pkgconfig pkgutil_resolve_name platformdirs ply ppl primecountpy
+  prometheus_client prompt_toolkit psutil ptyprocess pure_eval pycparser pydantic pydantic_core
+  pydantic_settings pydevd_plugins pygments pylab pymdownx pyparsing python_multipart
+  pythonjsonlogger pythran pytz pyximport referencing regex requests rfc3339_validator
+  rfc3986_validator rich roman_numerals rpds rpy2 s3transfer safetensors sage sagetex sagetexparse
+  scipy send2trash sentry_sdk setproctitle setuptools shellingham simplegeneric six smmap sniffio
+  snowballstemmer socks sockshandler soupsieve sphinx sse_starlette stack_data starlette strands
+  super_collections sympy termcolor terminado test tinycss2 tokenizers tomli torch torchgen
+  tornado tqdm traitlets transformers triton truststore typer typing_extensions typing_inspection
+  typing_utils tzdata tzlocal unicodedata2 uri_template urllib3 uvicorn verspec wandb watchdog
+  wcwidth webcolors webencodings websocket wheel widgetsnbextension xxhash yaml yaml_env_tag zipp
+  zmq zstandard
   `.split(/\s+/).filter(Boolean),
 );
 

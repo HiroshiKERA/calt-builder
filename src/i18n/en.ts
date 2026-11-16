@@ -22,7 +22,7 @@ export const en = {
     nameErrors: {
       empty: "Please enter a project name.",
       invalid: "Use letters, numbers, spaces, hyphens or underscores.",
-      tooLong: "That name is a bit long, keep it to 40 characters or fewer.",
+      tooLong: "The folder name would be over 40 characters. Choose a shorter name.",
     },
     howTitle: "How it works",
     how: [
@@ -66,9 +66,10 @@ export const en = {
     nameTaken: (folder: string) =>
       `“${folder}” is already the folder of an example task or shared/. Choose another name.`,
     nameReserved: (folder: string) =>
-      `“${folder}” clashes with a name that Python, an installed package or the generated scripts already use, so it can't be a task folder. Choose another name.`,
+      `“${folder}” clashes with a name that Python, an installed package, the generated scripts or the operating system already use, so it can't be a task folder. Choose another name.`,
     nameTooLong: "The folder name would be over 40 characters. Choose a shorter name.",
     nameFallback: "This name has no letters or numbers to use, so the task folder will be named “my_task”.",
+    nameFallbackEmpty: "Without a name, the task folder will be named “my_task”.",
     customNameAlert: (message: string) => `Your own task: ${message}`,
     measurements: "What to measure (optional)",
     measurementsHint: "Statistics computed about your custom task's data.",
@@ -144,7 +145,7 @@ export const en = {
     download: "Download",
     saved: "Saved. See “How to use it” below.",
     downloadBlocked: "Your own task's name can't be used. Go back to Step 1 and rename it.",
-    downloadFailed: "The download could not be created. Please try again.",
+    downloadFailed: "The download could not be created. Reload the page and try again.",
     settings: "Custom task settings",
     optional: "optional",
     examplesQ: "Training sample size",
