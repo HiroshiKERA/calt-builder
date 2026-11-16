@@ -272,7 +272,10 @@ export function StepSettings() {
       )}
 
       {currentTab && (
-        <div className="grid gap-4 xl:grid-cols-[1fr_minmax(0,400px)] xl:items-start">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_minmax(0,400px)] xl:items-start">
+          {/* grid-cols-1 is minmax(0, 1fr): without it the single column grew to its
+              content's min width, so a wide control pushed the card past the edge of
+              a phone screen. The xl layout keeps its original tracks. */}
           <Card
             role="tabpanel"
             id={`settings-panel-${currentTab.id}`}

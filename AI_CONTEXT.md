@@ -26,7 +26,7 @@ all three:
 
 | Repo | Role |
 |---|---|
-| **QDaruma/CALTWebsite** (this) | The static builder site. Bundles a snapshot of task code and produces downloadable projects. |
+| **HiroshiKERA/calt-builder** (this) | The static builder site. Bundles a snapshot of task code and produces downloadable projects. |
 | **`task-sources/`** (vendored into this site repo) | The actual **task folders** (`parity/`, `groebner_basis/`, `integer_factorization/`, `gf17_addition/`, `eigvec_3x3/`, `polynomial_addition/`) + `shared/`. The site bundles from here — it is self-contained. Originally copied from `QDaruma/CALTCode@feat/encoder-only-handoff` (being deleted). See `task-sources/README.md`. |
 | **HiroshiKERA/calt** (the professor's library; pip package `calt-x`) | The engine: `DatasetPipeline`, `IOPipeline`, `ModelPipeline`, `TrainerPipeline`, the Transformer model, tokenizer, positional embeddings. The downloaded projects install this. |
 

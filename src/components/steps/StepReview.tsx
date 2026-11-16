@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { CALT_REQUIREMENT } from "../../lib/caltVersion";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Boxes, Check, Download, FolderTree, HelpCircle, PackageOpen, Terminal } from "lucide-react";
-import { useWizard, hasSelection, customBuildConfig } from "../../state/store";
+import { useWizard, hasSelection, customBuildConfig, customTaskIssue } from "../../state/store";
+import { customFolderName } from "../../lib/names";
 import { useT } from "../../i18n";
 import { buildProjectZip, projectFileMap, type ProjectSpec } from "../../lib/zip";
 import { Card } from "../ui/Card";
@@ -21,6 +22,10 @@ export function StepReview() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [showTree, setShowTree] = useState(false);
+  const [howOpen, setHowOpen] = useState(false);
+  const [failed, setFailed] = useState(false);
+  // An old session can still hold a custom task name that is no longer allowed.
+  const blocked = !!customTaskIssue(config);
 
   const proj = toSnakeCase(config.projectName) || "my_calt_project";
   const customCfg = customBuildConfig(config);
@@ -46,17 +51,24 @@ export function StepReview() {
   const taskCount =
     config.selectedTasks.length + (customCfg ? 1 : 0);
   const firstFolder =
-    config.selectedTasks[0] ?? (customCfg ? toSnakeCase(config.custom.name) || "my_task" : "task");
+    config.selectedTasks[0] ?? (customCfg ? customFolderName(config.custom.name) : "task");
 
   // Real file list of the ZIP, so the tree shows exactly what gets downloaded.
   const treePaths = useMemo(() => Object.keys(projectFileMap(spec)).sort(), [JSON.stringify(spec)]);
 
   const download = async () => {
     setBusy(true);
+    setFailed(false);
+    setDone(false);
     try {
       const { blob, filename } = await buildProjectZip(spec);
       downloadBlob(blob, filename);
       setDone(true);
+      // The "saved" message points here, so open it on every successful download.
+      setHowOpen(true);
+    } catch (err) {
+      console.error("Download failed", err);
+      setFailed(true);
     } finally {
       setBusy(false);
     }
@@ -86,7 +98,7 @@ export function StepReview() {
         <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-brand-200/50 to-accent-400/30 blur-2xl" />
         <AnimatePresence>{done && <Confetti />}</AnimatePresence>
         <div className="relative flex flex-wrap items-center gap-2">
-          <Button size="lg" shimmer loading={busy} onClick={download} className="sm:w-auto">
+          <Button size="lg" shimmer loading={busy} disabled={blocked} onClick={download} className="sm:w-auto">
             {!busy && <Download size={18} />} {t.review.download} ({proj}.zip)
           </Button>
           {/* The file tree is hidden by default and revealed via this "?" button. */}
@@ -110,6 +122,11 @@ export function StepReview() {
             )}
           </AnimatePresence>
         </div>
+        {(blocked || failed) && (
+          <p role="alert" className="relative mt-3 text-sm font-medium text-rose-600">
+            {blocked ? t.review.downloadBlocked : t.review.downloadFailed}
+          </p>
+        )}
       </Card>
 
       <div className="mt-5 space-y-4">
@@ -137,11 +154,16 @@ export function StepReview() {
           )}
         </AnimatePresence>
 
-        <Disclosure icon={<Terminal size={17} className="text-brand-600" />} title={t.review.howToUse} defaultOpen={done}>
+        <Disclosure
+          icon={<Terminal size={17} className="text-brand-600" />}
+          title={t.review.howToUse}
+          open={howOpen}
+          onOpenChange={setHowOpen}
+        >
           <p className="mb-3 text-sm text-ink-500">{t.review.prereq}</p>
           <ol className="mb-4 space-y-2.5 text-sm text-ink-600">
             {[t.review.howUnzipProject(proj), t.review.howInstall, t.review.howRun].map((line, i) => (
-              <li key={i} className="flex gap-2.5">
+              <li key={i} className="flex gap-2.5 [overflow-wrap:anywhere]">
                 <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-[11px] font-bold text-brand-700">
                   {i + 1}
                 </span>

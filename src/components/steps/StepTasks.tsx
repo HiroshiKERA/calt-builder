@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Check, ChevronDown, Copy, Download, FileCode2, Pencil, Sigma, Sparkles } from "lucide-react";
-import { useWizard, hasSelection, customBuildConfig } from "../../state/store";
+import { useWizard, hasSelection, customBuildConfig, customTaskIssue } from "../../state/store";
+import { customFolderName, usesFallbackFolder, type CustomNameIssue } from "../../lib/names";
 import { useT } from "../../i18n";
 import { TASKS } from "../../lib/tasks";
 import { STATS } from "../../lib/stats";
 import { freshGeneratorCode, defaultLexerConfig, type LexerConfig } from "../../lib/codegen";
-import { TEMPLATES, getTemplate } from "../../lib/templates";
+import { TEMPLATES, legacyTemplateRename, getTemplate } from "../../lib/templates";
 import { buildAiPrompt, buildMeasureAiPrompt } from "../../lib/aiPrompt";
 import { SectionLabel } from "../ui/Card";
 import { Badge } from "../ui/Badge";
@@ -17,7 +18,16 @@ import { Field, TextInput, TextArea } from "../ui/controls";
 import { Icon } from "../Icon";
 import { StepHeader, StepFooter } from "../layout/StepChrome";
 import { StepDetails } from "../layout/StepDetails";
-import { cn, downloadBlob, toSnakeCase, renameTaskInCode } from "../../lib/utils";
+import { cn, downloadBlob, renameTaskInCode } from "../../lib/utils";
+
+type Dict = ReturnType<typeof useT>;
+
+/** The message for a custom task name that cannot be used. */
+function nameIssueText(t: Dict, issue: CustomNameIssue, name: string): string {
+  const folder = customFolderName(name);
+  if (issue === "tooLong") return t.tasks.nameTooLong;
+  return issue === "taken" ? t.tasks.nameTaken(folder) : t.tasks.nameReserved(folder);
+}
 
 function AiPanel() {
   const { config } = useWizard();
@@ -25,7 +35,7 @@ function AiPanel() {
   const [desc, setDesc] = useState(config.custom.name);
   const [copied, setCopied] = useState(false);
   const prompt = useMemo(() => buildAiPrompt(config.custom.name, desc), [config.custom.name, desc]);
-  const snake = toSnakeCase(config.custom.name) || "my_task";
+  const snake = customFolderName(config.custom.name);
 
   const copy = async () => {
     try {
@@ -331,6 +341,8 @@ function LexerEditor() {
 
 type CustomSection = "generator" | "tokenizer" | "measure";
 
+
+
 function CustomBuilder() {
   const { config, patchCustom } = useWizard();
   const t = useT();
@@ -349,7 +361,7 @@ function CustomBuilder() {
   // Pick a starter template: seed the generator code from it and remember the
   // choice (it also drives the generated lexer.yaml, deps and max sequence length).
   const nameIsUntouched = (n: string) =>
-    !n || n === "My task" || TEMPLATES.some((tt) => tt.name === n);
+    !n || n === "My task" || TEMPLATES.some((tt) => tt.name === n) || legacyTemplateRename(n) !== null;
   const pickTemplate = (id: string) => {
     const tpl = getTemplate(id);
     // Resolve the effective name first, then seed the code from it, so the seeded
@@ -382,6 +394,7 @@ function CustomBuilder() {
     });
   };
   const activeTpl = getTemplate(config.custom.templateId);
+  const nameIssue = customTaskIssue(config);
 
   return (
     <div className="mt-4 space-y-4 border-t border-ink-100 pt-4">
@@ -425,7 +438,18 @@ function CustomBuilder() {
             value={config.custom.name}
             placeholder={t.tasks.customNamePlaceholder}
             onChange={(e) => renameTask(e.target.value)}
+            aria-invalid={!!nameIssue}
+            aria-describedby={nameIssue || usesFallbackFolder(config.custom.name) ? "custom-name-help" : undefined}
           />
+          {nameIssue ? (
+            <p id="custom-name-help" className="mt-1.5 text-xs font-medium leading-snug text-rose-500">
+              {nameIssueText(t, nameIssue, config.custom.name)}
+            </p>
+          ) : usesFallbackFolder(config.custom.name) ? (
+            <p id="custom-name-help" className="mt-1.5 text-xs leading-snug text-ink-400">
+              {t.tasks.nameFallback}
+            </p>
+          ) : null}
           <p className="mt-1.5 hidden text-xs leading-snug text-ink-400 lg:block">
             {t.tasks.buildOwnDesc}
           </p>
@@ -497,6 +521,7 @@ export function StepTasks() {
   const t = useT();
   const items = t.tasks.items;
   const count = config.selectedTasks.length + (config.custom.enabled ? 1 : 0);
+  const customIssue = customTaskIssue(config);
 
   const allIds = TASKS.map((task) => task.id);
   const allSelected = allIds.length > 0 && allIds.every((id) => config.selectedTasks.includes(id));
@@ -633,7 +658,18 @@ export function StepTasks() {
         })}
       </div>
 
-      <StepFooter onContinue={next} continueDisabled={!hasSelection(config)} continueLabel={t.tasks.continueLabel} />
+      {/* Shown even when the custom panel is collapsed, so a disabled Continue is never unexplained. */}
+      {customIssue && (
+        <p role="alert" className="mt-6 rounded-xl bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-600 ring-1 ring-rose-500/25">
+          {t.tasks.customNameAlert(nameIssueText(t, customIssue, config.custom.name))}
+        </p>
+      )}
+
+      <StepFooter
+        onContinue={next}
+        continueDisabled={!hasSelection(config) || !!customIssue}
+        continueLabel={t.tasks.continueLabel}
+      />
     </div>
   );
 }

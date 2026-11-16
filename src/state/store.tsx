@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { type BuildConfig, type LexerConfig, type ModelPreset, type ModelType, type PosEmbedding } from "../lib/codegen";
 import { defaultSelectedStats } from "../lib/stats";
+import { customNameIssue, type CustomNameIssue } from "../lib/names";
+import { legacyTemplateRename } from "../lib/templates";
+import { renameTaskInCode } from "../lib/utils";
 
 // Persist the in-progress wizard to sessionStorage so a refresh (or accidental
 // reload) does not wipe the user's choices. sessionStorage (not localStorage) so
@@ -112,6 +115,17 @@ function loadPersisted(): Persisted {
     const saved = JSON.parse(raw) as Partial<Persisted>;
     // Merge over defaults so newly-added config keys are never undefined.
     const config = { ...defaultConfig, ...saved.config, custom: { ...defaultConfig.custom, ...saved.config?.custom } };
+    // A default name an earlier version used (and that now collides) is renamed
+    // to its replacement, code included, so old sessions are not stuck.
+    const legacy = legacyTemplateRename(config.custom.name);
+    if (legacy) {
+      const code = config.custom.code;
+      config.custom = {
+        ...config.custom,
+        name: legacy,
+        code: code ? renameTaskInCode(code, config.custom.name, legacy) : code,
+      };
+    }
     const step = Math.max(0, Math.min(LAST_STEP, saved.step ?? 0));
     return { config, step };
   } catch {
@@ -198,6 +212,11 @@ export function useWizard(): WizardCtx {
 /** True when the project has at least one task (example or custom). */
 export function hasSelection(c: WizardConfig): boolean {
   return c.selectedTasks.length > 0 || c.custom.enabled;
+}
+
+/** Why the enabled custom task's name cannot be used, or null (also null when it is off). */
+export function customTaskIssue(c: WizardConfig): CustomNameIssue | null {
+  return c.custom.enabled ? customNameIssue(c.custom.name) : null;
 }
 
 /** Build a codegen config for the custom task, or null when none. */

@@ -8,19 +8,31 @@ export function Disclosure({
   title,
   hint,
   defaultOpen = false,
+  open: openProp,
+  onOpenChange,
   children,
 }: {
   icon?: ReactNode;
   title: ReactNode;
   hint?: ReactNode;
   defaultOpen?: boolean;
+  /** Controlled open state. Leave undefined to let the panel manage itself. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [innerOpen, setInnerOpen] = useState(defaultOpen);
+  const open = openProp ?? innerOpen;
+  const setOpen = (next: boolean) => {
+    if (openProp === undefined) setInnerOpen(next);
+    onOpenChange?.(next);
+  };
   return (
     <div className="overflow-hidden rounded-2xl bg-surface ring-1 ring-ink-200/70 shadow-card">
       <button
-        onClick={() => setOpen((o) => !o)}
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
         className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-ink-50/60"
       >
         <span className="flex items-center gap-2.5 text-[15px] font-bold text-ink-800">

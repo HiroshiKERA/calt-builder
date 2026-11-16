@@ -19,6 +19,11 @@ export const en = {
     nameHelpEmpty:
       "This only sets the name of the downloaded project folder. You can rename it anytime.",
     namedAs: (snake: string) => `Your project folder will be named “${snake}”.`,
+    nameErrors: {
+      empty: "Please enter a project name.",
+      invalid: "Use letters, numbers, spaces, hyphens or underscores.",
+      tooLong: "That name is a bit long, keep it to 40 characters or fewer.",
+    },
     howTitle: "How it works",
     how: [
       {
@@ -58,6 +63,13 @@ export const en = {
     startFrom: "Start from a template",
     customNameLabel: "Task name",
     customNamePlaceholder: "e.g. Add two numbers",
+    nameTaken: (folder: string) =>
+      `“${folder}” is already the folder of an example task or shared/. Choose another name.`,
+    nameReserved: (folder: string) =>
+      `“${folder}” clashes with a name that Python, an installed package or the generated scripts already use, so it can't be a task folder. Choose another name.`,
+    nameTooLong: "The folder name would be over 40 characters. Choose a shorter name.",
+    nameFallback: "This name has no letters or numbers to use, so the task folder will be named “my_task”.",
+    customNameAlert: (message: string) => `Your own task: ${message}`,
     measurements: "What to measure (optional)",
     measurementsHint: "Statistics computed about your custom task's data.",
     tokenizer: "Tokenizer / vocabulary (optional)",
@@ -131,6 +143,8 @@ export const en = {
     empty: "No tasks selected yet. Go back and add at least one.",
     download: "Download",
     saved: "Saved. See “How to use it” below.",
+    downloadBlocked: "Your own task's name can't be used. Go back to Step 1 and rename it.",
+    downloadFailed: "The download could not be created. Please try again.",
     settings: "Custom task settings",
     optional: "optional",
     examplesQ: "Training sample size",

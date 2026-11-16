@@ -4,6 +4,7 @@ import { TASK_FILES, COMMON_FILES } from "../generated/projectFiles";
 import { getTaskMeta } from "./tasks";
 import { buildProjectReadme } from "./projectReadme";
 import { toSnakeCase } from "./utils";
+import { customFolderName, customNameIssue } from "./names";
 
 /** Global training settings applied to every task in the project. */
 export interface ProjectSettings {
@@ -106,6 +107,17 @@ function withCurrentPin(path: string, content: string): string {
     .join("\n");
 }
 
+/**
+ * The custom task config when it can be shipped, or null. A custom task whose
+ * folder would collide with an example task, shared/ or a Python name is left
+ * out as a whole (the UI blocks this case; this only guards stale state), so
+ * its files never mix with another folder's.
+ */
+function shippableCustom(spec: ProjectSpec): BuildConfig | null {
+  const cfg = spec.customConfig;
+  return cfg && !customNameIssue(cfg.taskName) ? cfg : null;
+}
+
 /** Build the full set of files (path -> content) the ZIP will contain. */
 export function projectFileMap(spec: ProjectSpec): Record<string, string> {
   const proj = toSnakeCase(spec.projectName) || "my_calt_project";
@@ -117,7 +129,8 @@ export function projectFileMap(spec: ProjectSpec): Record<string, string> {
     const effectiveSettings: ProjectSettings = { ...spec.settings, ...spec.perTaskSettings?.[id] };
     if (files) for (const [p, c] of Object.entries(files)) map[prefix + p] = applySettings(p, c, effectiveSettings);
   }
-  if (spec.customConfig) for (const f of buildFiles(spec.customConfig)) map[prefix + f.path] = f.content;
+  const custom = shippableCustom(spec);
+  if (custom) for (const f of buildFiles(custom)) map[prefix + f.path] = f.content;
 
   if (spec.mode === "project") {
     for (const [p, c] of Object.entries(COMMON_FILES)) map[prefix + p] = withCurrentPin(p, c);
@@ -128,7 +141,7 @@ export function projectFileMap(spec: ProjectSpec): Record<string, string> {
     // A friendly, project-specific README at the root.
     const taskFolders = [
       ...spec.selectedTasks,
-      ...(spec.customConfig ? [toSnakeCase(spec.customConfig.taskName) || "my_task"] : []),
+      ...(custom ? [customFolderName(custom.taskName)] : []),
     ];
     const sageTasks = spec.selectedTasks.filter((id) => getTaskMeta(id)?.needsSage);
     map[prefix + "README.md"] = buildProjectReadme({
@@ -143,6 +156,11 @@ export function projectFileMap(spec: ProjectSpec): Record<string, string> {
 export async function buildProjectZip(spec: ProjectSpec): Promise<{ blob: Blob; filename: string }> {
   // Lazy-load JSZip: it is only needed at download time, so it stays out of the
   // initial bundle and is fetched on the first download click.
+  // Unlike projectFileMap (which also renders the file tree), refuse rather than
+  // silently ship a ZIP without the user's custom task.
+  if (spec.customConfig && !shippableCustom(spec)) {
+    throw new Error(`Custom task name cannot be used: ${spec.customConfig.taskName}`);
+  }
   const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   for (const [path, content] of Object.entries(projectFileMap(spec))) {

@@ -48,9 +48,11 @@ export function renameTaskInCode(code: string, oldName: string, newName: string)
 
   const oldClass = toGeneratorClassName(oldName);
   const newClass = toGeneratorClassName(newName);
-  // Class names are [A-Za-z0-9]+, so a \b word-boundary match is safe.
+  // Only the class definition: the name is derived from every keystroke, so
+  // replacing all occurrences would rewrite unrelated code whenever an
+  // intermediate name matched it (typing "none…" turned every None into the class).
   if (oldClass !== newClass) {
-    out = out.replace(new RegExp(`\\b${oldClass}\\b`, "g"), newClass);
+    out = out.replace(new RegExp(`\\bclass\\s+${oldClass}\\b`, "g"), `class ${newClass}`);
   }
 
   // Header comment: "...pairs for the <name> task." (literal replace, no regex).
@@ -68,12 +70,17 @@ export function isValidIdentifier(name: string): boolean {
   return /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
 }
 
-/** A human-friendly check that a task name is usable. Returns an error string or null. */
-export function validateTaskName(name: string): string | null {
-  if (!name.trim()) return "Please enter a task name.";
+export type FolderNameError = "empty" | "invalid" | "tooLong";
+
+/**
+ * Check that a name gives a usable project folder. Returns an error code (the
+ * component maps it to a message in the UI language) or null.
+ */
+export function validateFolderName(name: string): FolderNameError | null {
+  if (!name.trim()) return "empty";
   const snake = toSnakeCase(name);
-  if (!snake) return "Use letters, numbers, spaces, hyphens or underscores.";
-  if (snake.length > 40) return "That name is a bit long, keep it under 40 characters.";
+  if (!snake) return "invalid";
+  if (snake.length > 40) return "tooLong";
   return null;
 }
 

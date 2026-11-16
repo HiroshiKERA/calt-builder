@@ -23,7 +23,7 @@ export function buildProjectReadme(o: ReadmeOpts): string {
   const sageNote = o.sageTasks.length
     ? `\n> Some tasks here compute their answers with **SageMath** (${o.sageTasks
         .map((t) => `\`${t}\``)
-        .join(", ")}). The conda environment below already includes it, so there
+        .join(", ")}). The conda environment above already includes it, so there
 > is nothing extra to install.\n`
     : "";
 
@@ -77,7 +77,8 @@ This project includes:
 
 ${taskList}
 
-Each task runs in three steps. From the task's \`scripts\` folder:
+Each task runs in three steps. From this project folder, go into the task's
+\`scripts\` folder and run:
 
 \`\`\`bash
 conda activate calt-env
