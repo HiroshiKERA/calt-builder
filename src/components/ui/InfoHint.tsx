@@ -40,7 +40,7 @@ export function InfoHint({
           align="start"
           sideOffset={8}
           collisionPadding={16}
-          className="z-50 w-[300px] rounded-xl bg-surface p-4 text-sm leading-relaxed text-ink-600 shadow-lifted ring-1 ring-ink-200 data-[state=open]:animate-scale-in"
+          className="z-50 w-[min(300px,calc(100vw-2rem))] rounded-xl bg-surface p-4 text-sm leading-relaxed text-ink-600 shadow-lifted ring-1 ring-ink-200 data-[state=open]:animate-scale-in"
         >
           {title && <p className="mb-1 font-bold text-ink-800">{title}</p>}
           <div className="space-y-2">{children}</div>

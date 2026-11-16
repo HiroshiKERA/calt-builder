@@ -4,10 +4,25 @@
 @tailwind utilities;
 
 @layer base {
-  /* Japanese line-breaking rules (kinsoku): never start a line with ー, a small
-     kana or closing punctuation. Inherited by every Japanese element. */
+  /* Japanese line breaking, inherited by every Japanese element:
+     - line-break: strict (kinsoku): never start a line with ー, a small kana or
+       closing punctuation.
+     - word-break: auto-phrase: break at phrase boundaries instead of between any
+       two characters. Chrome/Edge 119+ only; Safari (all iOS browsers) and
+       Firefox ignore it and keep per-character breaking.
+     Elements that set their own word-break (break-keep with U+200B hints, e.g.
+     Segmented labels and the welcome heading) keep it. */
   html:lang(ja) {
     line-break: strict;
+    word-break: auto-phrase;
+  }
+  /* Typing into a textarea should not make line breaks jump around: no phrase
+     breaking (ja) and no inherited text-wrap: pretty (any language). */
+  html:lang(ja) textarea {
+    word-break: normal;
+  }
+  textarea {
+    text-wrap: wrap;
   }
 
   :root {
@@ -73,6 +88,10 @@
 
   body {
     margin: 0;
+    /* Avoid a lone word or character on the last line (Chromium 117+, Safari 26+;
+       ignored elsewhere). Inherited; never set text-wrap utilities on elements
+       with whitespace-nowrap/truncate, since text-wrap resets the wrap mode. */
+    text-wrap: pretty;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: rgb(var(--ink-800));
     background-color: rgb(var(--page));

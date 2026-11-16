@@ -233,7 +233,7 @@ export function StepSettings() {
         <div
           role="tablist"
           aria-label={t.a11y.settingsTabs}
-          className="mb-4 flex gap-1 rounded-xl bg-ink-100/60 p-1"
+          className="mb-4 flex flex-wrap gap-1 rounded-xl bg-ink-100/60 p-1"
         >
           {tabs.map((tab, idx) => {
             const selected = currentTab?.id === tab.id;
@@ -257,7 +257,11 @@ export function StepSettings() {
                   }
                 }}
                 className={cn(
-                  "flex-1 truncate rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-brand-400/40",
+                  // Each tab is as wide as its label (left-aligned, not stretched);
+                  // tabs that do not fit move to a new row. Preset names never
+                  // shrink; the custom task's free-text name may wrap.
+                  "rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-brand-400/40",
+                  tab.id === "__custom" ? "min-w-0 max-w-full whitespace-normal [overflow-wrap:anywhere]" : "shrink-0 whitespace-nowrap",
                   selected ? "bg-surface shadow-soft text-ink-900" : "text-ink-500 hover:text-ink-700",
                 )}
               >

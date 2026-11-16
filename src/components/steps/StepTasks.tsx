@@ -59,7 +59,7 @@ function AiPanel() {
       <div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-semibold text-ink-700">{t.data.aiPromptLabel}</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="secondary" size="sm" onClick={download}>
               <Download size={14} /> {t.data.downloadTxt}
             </Button>
@@ -112,7 +112,7 @@ function MeasureAiPanel() {
       <div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-semibold text-ink-700">{t.data.aiPromptLabel}</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="secondary" size="sm" onClick={download}>
               <Download size={14} /> {t.data.downloadTxt}
             </Button>

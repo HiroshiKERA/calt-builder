@@ -98,8 +98,13 @@ export function StepReview() {
         <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-brand-200/50 to-accent-400/30 blur-2xl" />
         <AnimatePresence>{done && <Confetti />}</AnimatePresence>
         <div className="relative flex flex-wrap items-center gap-2">
-          <Button size="lg" shimmer loading={busy} disabled={blocked} onClick={download} className="sm:w-auto">
-            {!busy && <Download size={18} />} {t.review.download} ({proj}.zip)
+          {/* h-auto + wrapping filename: a 40-character project name must not push
+              the button past a 320px screen. */}
+          <Button size="lg" shimmer loading={busy} disabled={blocked} onClick={download} className="h-auto min-h-12 max-w-full py-2 sm:w-auto">
+            {!busy && <Download size={18} className="flex-shrink-0" />}
+            <span className="min-w-0">
+              {t.review.download} <span className="[overflow-wrap:anywhere]">({proj}.zip)</span>
+            </span>
           </Button>
           {/* The file tree is hidden by default and revealed via this "?" button. */}
           <button

@@ -29,6 +29,18 @@ const sizes: Record<Size, string> = {
   icon: "h-10 w-10 rounded-xl",
 };
 
+/** The Button look for other elements, e.g. a link styled as a button (no <a><button> nesting). */
+export function buttonClasses(variant: Variant = "primary", size: Size = "md", className?: string): string {
+  return cn(
+    "relative inline-flex select-none items-center justify-center font-semibold transition-all duration-200",
+    "outline-none focus-visible:ring-4 focus-visible:ring-brand-400/30 focus-visible:ring-offset-0",
+    "disabled:pointer-events-none disabled:opacity-50",
+    variants[variant],
+    sizes[size],
+    className,
+  );
+}
+
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   { variant = "primary", size = "md", loading, shimmer, className, children, disabled, ...rest },
   ref,
@@ -37,15 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
     <button
       ref={ref}
       disabled={disabled || loading}
-      className={cn(
-        "relative inline-flex select-none items-center justify-center font-semibold transition-all duration-200",
-        "outline-none focus-visible:ring-4 focus-visible:ring-brand-400/30 focus-visible:ring-offset-0",
-        "disabled:pointer-events-none disabled:opacity-50",
-        variants[variant],
-        sizes[size],
-        shimmer && variant === "primary" && "shimmer-btn",
-        className,
-      )}
+      className={buttonClasses(variant, size, cn(shimmer && variant === "primary" && "shimmer-btn", className))}
       {...rest}
     >
       {loading && <Loader2 className="animate-spin" size={size === "lg" ? 18 : 16} />}

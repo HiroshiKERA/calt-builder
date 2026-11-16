@@ -74,11 +74,12 @@ function Rows({
                 {!child.isFile && "/"}
               </span>
               {strong && (
-                <span className="ml-1.5 inline-flex items-center rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-soft">
+                <span className="ml-1.5 inline-flex items-center whitespace-nowrap rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-soft">
                   {strong}
                 </span>
               )}
-              {note && <span className="ml-1.5 text-xs italic text-ink-400">{note}</span>}
+              {/* Italic would be a fake slant on Japanese, so English only. */}
+              {note && <span className="ml-1.5 min-w-0 text-xs italic text-ink-400 [&:lang(ja)]:not-italic">{note}</span>}
             </div>
             {!child.isFile && (
               <Rows node={child} depth={depth + 1} notes={notes} strongNotes={strongNotes} />
