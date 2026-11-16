@@ -23,9 +23,11 @@ export const ja: Dict = {
     language: "言語",
   },
   welcome: {
-    title: "すぐに学習を始められる",
-    titleHighlight: "CALTプロジェクトを作ろう",
-    titleJoiner: "",
+    // \u200B marks phrase boundaries: the heading uses break-keep, so on phones it
+    // wraps only there (すぐに / 学習を / 始められる / CALT / プロジェクトを / 作ろう).
+    title: "すぐに\u200B学習を\u200B始められる",
+    titleHighlight: "CALT\u200Bプロジェクトを\u200B作ろう",
+    titleJoiner: "\u200B",
     subtitle:
       "用意されたタスクを選んで設定を少し調整すれば、すぐ実行できるプロジェクト一式をダウンロードできます。あとはコマンドをコピー＆ペーストするだけで、自分のパソコンで学習を始められます。",
     nameLabel: "プロジェクト名",

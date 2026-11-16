@@ -34,7 +34,7 @@ export function StepWelcome() {
           custom={0}
           initial="hidden"
           animate="show"
-          className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px]"
+          className="mx-auto max-w-3xl break-keep text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px] [&:lang(ja)]:text-[30px] sm:[&:lang(ja)]:text-[52px]"
         >
           {t.welcome.title}
           <br className="hidden sm:block" />
