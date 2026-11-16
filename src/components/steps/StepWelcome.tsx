@@ -34,12 +34,17 @@ export function StepWelcome() {
           custom={0}
           initial="hidden"
           animate="show"
-          className="mx-auto max-w-3xl break-keep text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px] [&:lang(ja)]:text-[30px] sm:[&:lang(ja)]:text-[52px]"
+          // Japanese: title / highlight on their own lines. From sm up each stays on
+          // one line (two lines in all), sized to the viewport so the longer first
+          // line (about 16em) fits; on phones the title also breaks once, at its
+          // U+200B, so the heading keeps a readable size (three lines).
+          className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px] [&:lang(ja)]:text-[length:min(30px,8.4vw)] sm:[&:lang(ja)]:text-[length:min(40px,calc((100vw-48px)/16))]"
         >
-          {t.welcome.title}
-          <br className="hidden sm:block" />
+          <span className="[&:lang(ja)]:block [&:lang(ja)]:break-keep sm:[&:lang(ja)]:whitespace-nowrap">{t.welcome.title}</span>
+          {/* Japanese breaks via the block spans instead, so this <br> is hidden there. */}
+          <br className="hidden sm:block [&:lang(ja)]:hidden" />
           {t.welcome.titleJoiner}
-          <span className="gradient-text">{t.welcome.titleHighlight}</span>
+          <span className="gradient-text [&:lang(ja)]:block [&:lang(ja)]:whitespace-nowrap">{t.welcome.titleHighlight}</span>
         </motion.h1>
 
         <motion.p
