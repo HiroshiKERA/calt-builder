@@ -54,8 +54,9 @@ function walk(absDir, baseForKeys, acc) {
       const ext = entry.slice(entry.lastIndexOf("."));
       if (!ALLOWED_EXT.has(ext)) continue;
       if (isExcludedPath(rel)) continue;
-      const raw = readFileSync(abs, "utf8");
-      acc[rel] = ext === ".sh" ? raw.replace(/\r\n/g, "\n") : raw;
+      // Every bundled file is text; ship LF so a Windows checkout (CRLF) does
+      // not rewrite the whole bundle.
+      acc[rel] = readFileSync(abs, "utf8").replace(/\r\n/g, "\n");
     }
   }
 }
@@ -94,18 +95,21 @@ if (existsSync(join(frameworkRoot, "shared"))) walk(join(frameworkRoot, "shared"
 for (const f of ["pyproject.toml"]) {
   const local = join(projectFilesDir, f);
   const upstream = join(frameworkRoot, f);
-  if (existsSync(local)) common[f] = readFileSync(local, "utf8");
-  else if (existsSync(upstream)) common[f] = readFileSync(upstream, "utf8");
+  const src = existsSync(local) ? local : existsSync(upstream) ? upstream : null;
+  if (src) common[f] = readFileSync(src, "utf8").replace(/\r\n/g, "\n");
 }
 
 // ---- Snapshot stamp: records when this bundle was taken and the engine pin ----
-// The calt-x pin lives in pyproject.toml (e.g. `"calt-x==1.1.0",`).
+// The calt-x pin lives in pyproject.toml (e.g. `"calt-x==1.6.0",`). Take the
+// whole specifier from the first non-comment line that has one, so a comment
+// mentioning calt-x (or an older pin) is never reported as the engine.
+const CALT_PIN_RE = /(?<![\w.-])calt-x(\[[^\]]*\])?\s*==\s*[^\s"',;]+/;
 const caltLine =
   (common["pyproject.toml"] || "")
     .split("\n")
-    .map((l) => l.match(/calt-x[^"',]*/))
-    .find(Boolean)?.[0]
-    ?.trim() || "calt-x (unpinned)";
+    .map((l) => l.replace(/#.*/, "").match(CALT_PIN_RE)?.[0])
+    .find(Boolean)
+    ?.replace(/\s+/g, "") || "calt-x (unpinned)";
 const bundledOn = new Date().toISOString().slice(0, 10);
 common["CALT_SNAPSHOT.txt"] =
   `CALT project snapshot\n` +

@@ -54,9 +54,6 @@ function applySettings(path: string, content: string, s: ProjectSettings): strin
   if (path.endsWith("experiments/toy/configs/data.yaml")) {
     content = setYamlInt(content, "num_train_samples", s.numTrain);
     content = setYamlInt(content, "num_test_samples", s.numTest);
-  } else if (path.endsWith("pyproject.toml")) {
-    // Keep the bundled pin in step with caltVersion.ts, whatever the snapshot holds.
-    content = content.replace(/calt-x==[0-9]+\.[0-9]+\.[0-9]+/g, CALT_REQUIREMENT);
   } else if (path.endsWith("experiments/toy/configs/train.yaml")) {
     const m = MODEL_PRESETS[s.modelPreset];
     content = setYamlInt(content, "num_encoder_layers", m.layers);
@@ -74,6 +71,26 @@ function applySettings(path: string, content: string, s: ProjectSettings): strin
   return content;
 }
 
+/**
+ * Matches a whole `calt-x==<version>` specifier, extras included
+ * (`calt-x[kaggle]==1.6.0.post1`), but not a longer name such as `mycalt-x`.
+ */
+const CALT_PIN_RE = /(?<![\w.-])calt-x(\[[^\]]*\])?\s*==\s*[^\s"',;]+/g;
+
+/**
+ * Rewrite the calt-x pin in the shared pyproject.toml to CALT_REQUIREMENT.
+ * pyproject.toml is a shared file, so this runs on COMMON_FILES rather than
+ * inside applySettings (which only sees task files). It only touches the pin:
+ * `npm run build` runs scripts/check-bundle.mjs, which fails when the bundle
+ * (pin, requires-python, CALT_SNAPSHOT.txt) is out of step with caltVersion.ts.
+ */
+function withCurrentPin(path: string, content: string): string {
+  if (path !== "pyproject.toml") return content;
+  return content.replace(CALT_PIN_RE, (_m, extras: string | undefined) =>
+    CALT_REQUIREMENT.replace("calt-x", `calt-x${extras ?? ""}`),
+  );
+}
+
 /** Build the full set of files (path -> content) the ZIP will contain. */
 export function projectFileMap(spec: ProjectSpec): Record<string, string> {
   const proj = toSnakeCase(spec.projectName) || "my_calt_project";
@@ -88,7 +105,7 @@ export function projectFileMap(spec: ProjectSpec): Record<string, string> {
   if (spec.customConfig) for (const f of buildFiles(spec.customConfig)) map[prefix + f.path] = f.content;
 
   if (spec.mode === "project") {
-    for (const [p, c] of Object.entries(COMMON_FILES)) map[prefix + p] = c;
+    for (const [p, c] of Object.entries(COMMON_FILES)) map[prefix + p] = withCurrentPin(p, c);
 
     // Note: wandb (optional progress logging) ships as a calt-x dependency, so the
     // conda install already covers it when a task turns logging on.
