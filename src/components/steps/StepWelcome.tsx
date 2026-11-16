@@ -37,7 +37,9 @@ export function StepWelcome() {
           className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px]"
         >
           {t.welcome.title}
-          <br className="hidden sm:block" /> <span className="gradient-text">{t.welcome.titleHighlight}</span>
+          <br className="hidden sm:block" />
+          {t.welcome.titleJoiner}
+          <span className="gradient-text">{t.welcome.titleHighlight}</span>
         </motion.h1>
 
         <motion.p

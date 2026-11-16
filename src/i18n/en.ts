@@ -85,7 +85,7 @@ const statTexts = {
   output_length: { label: "Answer length", desc: "How many pieces each answer is made of." },
   input_chars: { label: "Problem size", desc: "How many characters long each problem is." },
   output_chars: { label: "Answer size", desc: "How many characters long each answer is." },
-  max_abs_value: { label: "Biggest number", desc: "The largest number in each problem, ignoring its sign." },
+  max_abs_value: { label: "Biggest number", desc: "The largest integer in each problem, ignoring its sign (0 if there is none)." },
   num_elements: { label: "Number of parts", desc: "How many parts the problem is split into (by the “|” symbol)." },
 };
 export type StatKey = keyof typeof statTexts;
@@ -108,6 +108,8 @@ export const en = {
   welcome: {
     title: "Build a CALT project,",
     titleHighlight: "ready to train",
+    /** Joins title and titleHighlight where they share a line (phones): a space in English. */
+    titleJoiner: " ",
     subtitle:
       "Pick ready-made tasks, adjust a few settings, and download a complete project that's ready to train on your own machine with a few copy-paste commands.",
     nameLabel: "Name your project",
@@ -116,10 +118,10 @@ export const en = {
     nameHelpEmpty:
       "This only sets the name of the downloaded project folder. You can rename it anytime.",
     namedAs: (snake: string) => `Your project folder will be named “${snake}”.`,
-    nameDropped: "Folder names use only a–z, 0–9 and _, so the other characters are left out.",
+    nameDropped: "Folder names use only a–z, 0–9 and _, so other characters become _ or are left out.",
     nameErrors: {
       empty: "Please enter a project name.",
-      invalid: "Include at least one letter (a–z) or digit. Folder names keep only a–z, 0–9 and _.",
+      invalid: "Include at least one letter (a–z) or digit (0–9). Folder names keep only a–z, 0–9 and _.",
       tooLong: "The folder name would be over 40 characters. Choose a shorter name.",
     },
     howTitle: "How it works",
@@ -165,10 +167,10 @@ export const en = {
     nameReserved: (folder: string) =>
       `“${folder}” clashes with a name that Python, an installed package, the generated scripts or the operating system already use, so it can't be a task folder. Choose another name.`,
     nameTooLong: "The folder name would be over 40 characters. Choose a shorter name.",
-    nameFallback: "This name has no a–z letters or digits, so the task folder will be named “my_task”.",
+    nameFallback: "This name has no a–z or 0–9 characters, so the task folder will be named “my_task”.",
     nameFallbackEmpty: "Without a name, the task folder will be named “my_task”.",
     folderAs: (folder: string) => `The task folder will be named “${folder}”.`,
-    nameDropped: "Folder names use only a–z, 0–9 and _, so the other characters are left out.",
+    nameDropped: "Folder names use only a–z, 0–9 and _, so other characters become _ or are left out.",
     customNameAlert: (message: string) => `Your own task: ${message}`,
     measurementsHint: "Statistics computed about your custom task's data.",
     tabGenerator: "Generator",
@@ -208,7 +210,7 @@ export const en = {
     measureDescLabel: "Describe what you want to measure",
     measureDescPlaceholder: "e.g. how many prime numbers appear in the answer",
     measureCodeNote:
-      'Add one line per measurement, like stats["my_measure"] = len(str(answer).split()). You can use re, math, and _ints(text), which lists the numbers in a string.',
+      'Add one line per measurement, like stats["my_measure"] = len(str(answer).split()). You can use re, math, and _ints(text), which lists the integers in a string.',
   },
   review: {
     eyebrow: "Step 3",
@@ -255,7 +257,7 @@ export const en = {
     arch: "Model architecture",
     archInfoTitle: "Model architecture",
     archInfo:
-      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the Hugging Face implementation. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead: it reads the problem and writes the solution as one continuous sequence. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot; it needs expanded-form data.",
+      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the Hugging Face implementation. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead: it reads the problem and writes the solution as one continuous sequence. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot; it needs data written as coefficient/exponent (C/E) tokens.",
     archStandard: "Standard",
     archBart: "BART",
     archEncoderOnly: "Encoder only",
@@ -270,7 +272,7 @@ export const en = {
     archNoteDecoderOnly:
       "Reads the problem, then writes the solution as one continuous sequence, one token at a time.",
     archNoteMonomial:
-      "One position per monomial. Much shorter polynomial sequences; needs expanded-form data.",
+      "One position per monomial. Much shorter polynomial sequences; needs data written as coefficient/exponent (C/E) tokens.",
     rounds: "Training rounds",
     roundsInfoTitle: "Training rounds",
     roundsInfo:

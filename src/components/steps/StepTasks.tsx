@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, Copy, Download, FileCode2, Pencil, Sigma, Sparkles } from "lucide-react";
 import { useWizard, hasSelection, customBuildConfig, customTaskIssue } from "../../state/store";
-import { customFolderName, usesFallbackFolder, type CustomNameIssue } from "../../lib/names";
+import { customFolderName, customNameIssue, usesFallbackFolder, type CustomNameIssue } from "../../lib/names";
 import { useT } from "../../i18n";
 import { TASKS } from "../../lib/tasks";
 import { STATS } from "../../lib/stats";
@@ -195,7 +195,7 @@ function Measurements() {
         <div className="space-y-4 border-t border-ink-100 p-3">
           <Segmented
             ariaLabel={t.data.modeLabel}
-          layoutKey="measure-mode"
+            layoutKey="measure-mode"
             value={mode}
             onChange={(v) => setMode(v)}
             options={[
@@ -404,7 +404,9 @@ function CustomBuilder() {
   useEffect(() => syncCode, []); // eslint-disable-line react-hooks/exhaustive-deps
   const renameTask = (newName: string) => patchCustom({ name: newName });
   const activeTpl = getTemplate(config.custom.templateId);
-  const nameIssue = customTaskIssue(config);
+  // The help line checks the name even while "Include in project" is off, so
+  // it never shows a folder name the rules would reject once it is ticked.
+  const nameIssue = customNameIssue(config.custom.name);
 
   return (
     <div className="mt-4 space-y-4 border-t border-ink-100 pt-4">
@@ -493,7 +495,7 @@ function CustomBuilder() {
           <div className="space-y-3">
             <Segmented
               ariaLabel={t.data.modeLabel}
-          layoutKey="recipe-mode"
+              layoutKey="recipe-mode"
               value={mode}
               onChange={(v) => setMode(v)}
               options={[

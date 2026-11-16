@@ -80,10 +80,11 @@ export function isValidIdentifier(name: string): boolean {
 }
 
 /**
- * True when toSnakeCase silently leaves characters out of this name (anything
- * but ASCII letters, digits, spaces, hyphens and underscores), while still
- * keeping at least one usable character. Spaces and hyphens become "_" and
- * upper case is lowered; those are not counted as dropped.
+ * True when toSnakeCase changes characters other than the expected ones: any
+ * character but ASCII letters, digits, spaces, hyphens and underscores becomes
+ * "_" (or disappears at either end), while at least one usable character is
+ * kept. Spaces and hyphens becoming "_" and upper case being lowered are
+ * expected and do not count.
  */
 export function dropsCharacters(name: string): boolean {
   return /[^A-Za-z0-9\s_-]/.test(name) && toSnakeCase(name) !== "";

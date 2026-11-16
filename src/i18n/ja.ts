@@ -25,6 +25,7 @@ export const ja: Dict = {
   welcome: {
     title: "すぐに学習できる",
     titleHighlight: "CALTプロジェクトを作ろう",
+    titleJoiner: "",
     subtitle:
       "用意されたタスクを選んで設定を少し調整すれば、すぐ実行できるプロジェクト一式をダウンロードできます。あとはコマンドをコピー＆ペーストするだけで、自分のパソコンで学習を始められます。",
     nameLabel: "プロジェクト名",

@@ -150,9 +150,10 @@ which parts are edited" feature.
 ## 8. Settings (Step 2)
 
 Dataset size presets: **10,000 / 100,000 / 1,000,000** train (professor's request).
-Model size (small/medium/large), training rounds (epochs — renamed from "Practice
-rounds"), **Position embedding** (Learned[=generic]/Sinusoidal/RoPE/None), and a
-Weights & Biases logging toggle. The ConfigPreview sits beside these.
+Model size (small/medium/large), **Position embedding** (Learned[=generic]/Sinusoidal/
+RoPE/None), **Model architecture** (Standard/BART/Encoder only/Decoder only/Monomial),
+training rounds (epochs — renamed from "Practice rounds"), and a Weights & Biases
+logging toggle. The ConfigPreview sits beside these (below them under 1280px).
 
 ## 9. AI prompts, i18n, theming
 
@@ -161,12 +162,16 @@ Weights & Biases logging toggle. The ConfigPreview sits beside these.
 - i18n: `Dict = typeof en`; `ja.ts` must stay key-for-key in sync (missing key =
   compile error). The keyed maps (`tasks.items`, `tasks.templates`,
   `review.treeNotes`, `stats`) are declared at the top of `en.ts` and checked in
-  `ja.ts` with `satisfies`, so a missing or extra id fails too; `tasks.items` is
-  also checked against `ALLOWED_TASK_IDS`. UI strings via `useT()`;
+  `ja.ts` with `satisfies`, so ja cannot miss or add an id that en has.
+  `tasks.items` and `tasks.templates` are also checked against `ALLOWED_TASK_IDS`
+  / `TEMPLATE_IDS`; `stats` and `treeNotes` are not checked against `STATS` or
+  the folders, so add those to both dictionaries by hand. UI strings via `useT()`;
   `ErrorBoundary` (outside the provider) picks en/ja from `<html lang>`.
   Anything written into the ZIP (generated code, README, template `name` /
   `description`, `MEASURE_SEED`) and the AI prompt stay English. Each
-  `Segmented` takes a fixed, untranslated `layoutKey` for its highlight.
+  `Segmented` takes a fixed, untranslated `layoutKey` for its highlight. Its
+  labels use `word-break: keep-all`, so a Japanese label that may need to wrap
+  in a narrow button needs a U+200B break hint (e.g. `エンコーダ\u200Bのみ`).
 - Theme: CSS-variable tokens in `index.css` (`:root` / `.dark`); `theme-init.js`
   sets the class before paint.
 
