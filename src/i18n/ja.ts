@@ -195,8 +195,9 @@ export const ja: Dict = {
       "CALTが作るモデルの種類です。「Standard」はデフォルトのエンコーダ・デコーダです。「BART」はHugging Faceの実装です。「エンコーダのみ」はデコーダを外し、偶奇の判定のように答えが1トークンのタスクに使います。「デコーダのみ」は逆にエンコーダを外し、問題に続けて解を1本の列として生成します。「Monomial」は係数と指数を1つの位置にまとめ、多項式の列を大幅に短くします（展開形のデータが必要です）。",
     archStandard: "Standard",
     archBart: "BART",
-    archEncoderOnly: "エンコーダのみ",
-    archDecoderOnly: "デコーダのみ",
+    // \u200B: break hint so a narrow button wraps as エンコーダ / のみ (see Segmented).
+    archEncoderOnly: "エンコーダ\u200Bのみ",
+    archDecoderOnly: "デコーダ\u200Bのみ",
     archMonomial: "Monomial",
     archNoteGeneric: "デフォルトのエンコーダ・デコーダです。入力の列から出力の列を作るタスク全般に使えます。",
     archNoteBart: "Hugging FaceのBARTです。Standardと同じ形のタスクを、別の実装で扱います。",

@@ -78,7 +78,11 @@ export function Segmented<T extends string>({
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
               />
             )}
-            <span className="relative z-10 flex items-center gap-1.5">
+            {/* break-keep: Japanese would otherwise break between any two
+                characters and, squeezed in a narrow button, stack one character
+                per line. Labels break only at spaces or a U+200B break hint
+                (e.g. "エンコーダ\u200Bのみ"); no effect on English. */}
+            <span className="relative z-10 flex items-center gap-1.5 break-keep">
               {o.icon}
               {o.label}
             </span>
