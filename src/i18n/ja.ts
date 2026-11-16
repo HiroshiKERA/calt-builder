@@ -10,7 +10,7 @@ import type { TemplateId } from "../lib/templates";
 // BART, Hugging Face, Weights & Biases, file names and code. No space between
 // Japanese and Latin words (CALTプロジェクト), except around file names, code and
 // character ranges (a–z, 0–9, _).
-// "\n" in welcome.subtitle, welcome.how[0].body / [2].body and tasks.subtitle marks hand-picked
+// "\n" in welcome.subtitle, welcome.how[*].body and tasks.subtitle marks hand-picked
 // line breaks, shown only on screens wide enough (see components/ui/Lines.tsx).
 // Labels quoted inside other strings (e.g. 「小規模」 in examplesInfo) must be
 // updated together.
@@ -48,7 +48,7 @@ export const ja: Dict = {
     howTitle: "作成の流れ",
     how: [
       { title: "タスクを選ぶ", body: "用意されたサンプルタスクから\n選ぶか、自分でタスクを作ります。" },
-      { title: "自分のタスクを作る（任意）", body: "コードを自分で書くか、やりたいことを説明してAIに書いてもらいます。" },
+      { title: "自分のタスクを作る（任意）", body: "コードを自分で書くか、AIに\n説明して書いてもらいます。" },
       { title: "ダウンロード", body: "すぐ実行できるプロジェクト一式を\nZIPで受け取ります。" },
     ],
     trustBrowser: "ブラウザ内で完結し、何もアップロードされません",

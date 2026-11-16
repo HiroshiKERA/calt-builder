@@ -4,7 +4,7 @@ import logoUrl from "../../assets/logo.png";
 import { useWizard } from "../../state/store";
 import { useTheme } from "../../theme/ThemeProvider";
 import { useI18n } from "../../i18n";
-import { Button } from "../ui/Button";
+import { Button, buttonClasses } from "../ui/Button";
 import { Tooltip } from "../ui/Tooltip";
 import { cn } from "../../lib/utils";
 
@@ -20,7 +20,7 @@ function LangSwitch() {
           lang={l}
           aria-label={l === "en" ? "English" : "日本語"}
           className={cn(
-            "rounded-md px-2 py-1 transition-colors",
+            "whitespace-nowrap rounded-md px-2 py-1 transition-colors",
             lang === l ? "bg-surface text-ink-900 shadow-soft" : "text-ink-400 hover:text-ink-700",
           )}
         >
@@ -45,8 +45,11 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink-200/60 glass">
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <button onClick={goHome} className="group flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60">
+      {/* Phones: smaller logo and tighter gaps so the bar fits at 320px with
+          "Start over" showing; the wordmark hides below 360px (the logo's alt
+          still names the button). */}
+      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6">
+        <button onClick={goHome} className="group flex items-center gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 sm:gap-2.5">
           <motion.img
             src={logoUrl}
             alt="CALT"
@@ -55,9 +58,9 @@ export function TopBar() {
             whileHover={{ scale: 1.1, rotate: [0, -6, 4, 0] }}
             whileTap={{ scale: 0.92 }}
             transition={{ type: "spring", stiffness: 380, damping: 12 }}
-            className="h-16 w-16 flex-shrink-0 object-contain"
+            className="h-10 w-10 flex-shrink-0 object-contain sm:h-16 sm:w-16"
           />
-          <span className="flex flex-col items-start leading-none">
+          <span className="hidden flex-col items-start leading-none min-[360px]:flex">
             <span className="text-[15px] font-extrabold tracking-tight text-ink-900">{t.nav.brand}</span>
             <span className="mt-0.5 hidden text-[11px] font-medium text-ink-400 sm:block">
               {t.nav.tagline}
@@ -65,7 +68,7 @@ export function TopBar() {
           </span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {step > 0 && (
             <Tooltip content={t.nav.startOver}>
               <Button variant="ghost" size="sm" onClick={confirmReset} aria-label={t.nav.startOver}>
@@ -82,12 +85,11 @@ export function TopBar() {
           <a
             href="https://github.com/HiroshiKERA/calt-codebase/"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             aria-label={t.nav.github}
+            className={buttonClasses("secondary", "sm")}
           >
-            <Button variant="secondary" size="sm">
-              <Github size={15} /> <span className="hidden sm:inline">{t.nav.github}</span>
-            </Button>
+            <Github size={15} /> <span className="hidden sm:inline">{t.nav.github}</span>
           </a>
         </div>
       </div>
