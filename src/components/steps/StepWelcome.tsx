@@ -5,7 +5,7 @@ import { useT } from "../../i18n";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/controls";
-import { toSnakeCase, validateFolderName } from "../../lib/utils";
+import { dropsCharacters, toSnakeCase, validateFolderName } from "../../lib/utils";
 
 const HOW_ICONS = [Boxes, Pencil, Download];
 
@@ -34,10 +34,20 @@ export function StepWelcome() {
           custom={0}
           initial="hidden"
           animate="show"
-          className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px]"
+          // Japanese: title / highlight on their own lines. From sm up each stays on
+          // one line (two lines in all), sized so the longer first line (about
+          // 17.2em) fits: 100vw also counts a classic scrollbar, hence 64px and /18.
+          // Below sm the title may also break at its U+200B, so on phones the
+          // heading keeps a readable size (three lines below about 550px).
+          className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px] [&:lang(ja)]:text-[length:min(30px,8.4vw)] sm:[&:lang(ja)]:text-[length:min(40px,calc((100vw-64px)/18))]"
         >
-          {t.welcome.title}
-          <br className="hidden sm:block" /> <span className="gradient-text">{t.welcome.titleHighlight}</span>
+          <span className="[&:lang(ja)]:block [&:lang(ja)]:break-keep sm:[&:lang(ja)]:whitespace-nowrap">{t.welcome.title}</span>
+          {/* Japanese breaks via the block spans instead, so this <br> is hidden there. */}
+          <br className="hidden sm:block [&:lang(ja)]:hidden" />
+          {t.welcome.titleJoiner}
+          {/* inline-block (not block) so the gradient spans the text, not the full width;
+              the block title before it already starts a new line. */}
+          <span className="gradient-text [&:lang(ja)]:inline-block [&:lang(ja)]:whitespace-nowrap">{t.welcome.titleHighlight}</span>
         </motion.h1>
 
         <motion.p
@@ -45,7 +55,9 @@ export function StepWelcome() {
           custom={1}
           initial="hidden"
           animate="show"
-          className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-ink-500"
+          // text-balance evens out the lines, so a single word ("commands.") is
+          // not left alone on the last one.
+          className="mx-auto mt-5 max-w-2xl text-balance text-lg leading-relaxed text-ink-500"
         >
           {t.welcome.subtitle}
         </motion.p>
@@ -66,7 +78,7 @@ export function StepWelcome() {
                 aria-describedby="project-name-help"
                 className="h-12 text-[15px]"
               />
-              <Button size="lg" shimmer disabled={!canStart} onClick={start} className="sm:w-auto">
+              <Button size="lg" shimmer disabled={!canStart} onClick={start} className="whitespace-nowrap sm:w-auto sm:shrink-0">
                 {t.welcome.getStarted} <ArrowRight size={18} />
               </Button>
             </div>
@@ -74,7 +86,10 @@ export function StepWelcome() {
           {error ? (
             <p id="project-name-help" role="alert" className="mt-2 text-left text-xs font-medium text-rose-700 dark:text-rose-400">{error}</p>
           ) : config.projectName ? (
-            <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400 [overflow-wrap:anywhere]">{t.welcome.namedAs(toSnakeCase(config.projectName))}</p>
+            <p id="project-name-help" className="mt-2 text-left text-xs text-ink-500 [overflow-wrap:anywhere]">
+              {t.welcome.namedAs(toSnakeCase(config.projectName))}
+              {dropsCharacters(config.projectName) && <> {t.welcome.nameDropped}</>}
+            </p>
           ) : (
             <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400">{t.welcome.nameHelpEmpty}</p>
           )}

@@ -17,6 +17,7 @@ function LangSwitch() {
           key={l}
           onClick={() => setLang(l)}
           aria-pressed={lang === l}
+          lang={l}
           aria-label={l === "en" ? "English" : "日本語"}
           className={cn(
             "rounded-md px-2 py-1 transition-colors",

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, Copy, Download, FileCode2, Pencil, Sigma, Sparkles } from "lucide-react";
 import { useWizard, hasSelection, customBuildConfig, customTaskIssue } from "../../state/store";
-import { customFolderName, usesFallbackFolder, type CustomNameIssue } from "../../lib/names";
+import { customFolderName, customNameIssue, usesFallbackFolder, type CustomNameIssue } from "../../lib/names";
 import { useT } from "../../i18n";
 import { TASKS } from "../../lib/tasks";
 import { STATS } from "../../lib/stats";
@@ -18,7 +18,7 @@ import { Field, TextInput, TextArea } from "../ui/controls";
 import { Icon } from "../Icon";
 import { StepHeader, StepFooter } from "../layout/StepChrome";
 import { StepDetails } from "../layout/StepDetails";
-import { cn, downloadBlob, renameTaskInCode } from "../../lib/utils";
+import { cn, downloadBlob, dropsCharacters, renameTaskInCode } from "../../lib/utils";
 
 type Dict = ReturnType<typeof useT>;
 
@@ -194,7 +194,8 @@ function Measurements() {
         </div>
         <div className="space-y-4 border-t border-ink-100 p-3">
           <Segmented
-            ariaLabel="measure-mode"
+            ariaLabel={t.data.modeLabel}
+            layoutKey="measure-mode"
             value={mode}
             onChange={(v) => setMode(v)}
             options={[
@@ -306,7 +307,8 @@ function LexerEditor() {
           <InfoHint title={t.lexer.digitGroup}><p>{t.lexer.digitGroupInfo}</p></InfoHint>
         </div>
         <Segmented
-          ariaLabel="digit-group"
+          ariaLabel={t.lexer.digitGroup}
+          layoutKey="digit-group"
           value={String(lx.digitGroup)}
           onChange={(v) => set({ digitGroup: toInt(v, lx.digitGroup) })}
           options={[
@@ -402,7 +404,9 @@ function CustomBuilder() {
   useEffect(() => syncCode, []); // eslint-disable-line react-hooks/exhaustive-deps
   const renameTask = (newName: string) => patchCustom({ name: newName });
   const activeTpl = getTemplate(config.custom.templateId);
-  const nameIssue = customTaskIssue(config);
+  // The help line checks the name even while "Include in project" is off, so
+  // it never shows a folder name the rules would reject once it is ticked.
+  const nameIssue = customNameIssue(config.custom.name);
 
   return (
     <div className="mt-4 space-y-4 border-t border-ink-100 pt-4">
@@ -426,15 +430,15 @@ function CustomBuilder() {
                   )}
                 >
                   <Icon name={tpl.icon} size={14} className="flex-shrink-0" />
-                  {tpl.name}
+                  {t.tasks.templates[tpl.id].name}
                 </button>
               );
             })}
           </div>
           <p className="mt-2.5 text-xs leading-snug text-ink-500">
-            {activeTpl.beginnerSummary}
+            {t.tasks.templates[activeTpl.id].summary}
             {activeTpl.extraDeps?.length ? (
-              <span className="text-amber-600"> · needs {activeTpl.extraDeps.join(", ")}</span>
+              <span className="text-amber-600"> · {t.tasks.needsDeps(activeTpl.extraDeps.join(", "))}</span>
             ) : activeTpl.requiresSage ? (
               <span className="text-amber-600"> · {t.tasks.needsSage}</span>
             ) : null}
@@ -448,17 +452,24 @@ function CustomBuilder() {
             onChange={(e) => renameTask(e.target.value)}
             onBlur={syncCode}
             aria-invalid={!!nameIssue}
-            aria-describedby={nameIssue || usesFallbackFolder(config.custom.name) ? "custom-name-help" : undefined}
+            aria-describedby="custom-name-help"
           />
+          {/* Exactly one of: why the name can't be used, the my_task fallback, or
+              the folder the name becomes (plus a note when characters are dropped). */}
           {nameIssue ? (
-            <p id="custom-name-help" className="mt-1.5 text-xs font-medium leading-snug text-rose-700 dark:text-rose-400">
+            <p id="custom-name-help" className="mt-1.5 text-xs font-medium leading-snug text-rose-700 [overflow-wrap:anywhere] dark:text-rose-400">
               {nameIssueText(t, nameIssue, config.custom.name)}
             </p>
           ) : usesFallbackFolder(config.custom.name) ? (
             <p id="custom-name-help" className="mt-1.5 text-xs leading-snug text-ink-500">
               {config.custom.name.trim() ? t.tasks.nameFallback : t.tasks.nameFallbackEmpty}
             </p>
-          ) : null}
+          ) : (
+            <p id="custom-name-help" className="mt-1.5 text-xs leading-snug text-ink-500 [overflow-wrap:anywhere]">
+              {t.tasks.folderAs(customFolderName(config.custom.name))}
+              {dropsCharacters(config.custom.name) && <> {t.tasks.nameDropped}</>}
+            </p>
+          )}
           <p className="mt-1.5 hidden text-xs leading-snug text-ink-400 lg:block">
             {t.tasks.buildOwnDesc}
           </p>
@@ -470,6 +481,7 @@ function CustomBuilder() {
       <div className="space-y-3">
         <Segmented
           ariaLabel={t.tasks.sectionTabs}
+          layoutKey="Custom task sections"
           value={section}
           onChange={(v) => setSection(v as CustomSection)}
           options={[
@@ -482,7 +494,8 @@ function CustomBuilder() {
         {section === "generator" && (
           <div className="space-y-3">
             <Segmented
-              ariaLabel="recipe-mode"
+              ariaLabel={t.data.modeLabel}
+              layoutKey="recipe-mode"
               value={mode}
               onChange={(v) => setMode(v)}
               options={[
@@ -622,7 +635,7 @@ export function StepTasks() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {TASKS.map((task) => {
           const active = config.selectedTasks.includes(task.id);
-          const meta = items[task.id] ?? { name: task.id, summary: "" };
+          const meta = items[task.id] ?? { name: task.id, summary: "", tagline: "" };
           return (
             <button
               key={task.id}
@@ -653,7 +666,7 @@ export function StepTasks() {
                 </span>
                 <div className="min-w-0 pr-5">
                   <div className="text-[15px] font-bold text-ink-900">{meta.name}</div>
-                  <div className="truncate font-mono text-xs text-ink-400">{task.tagline}</div>
+                  <div className="truncate font-mono text-xs text-ink-400">{meta.tagline}</div>
                 </div>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-ink-500">{meta.summary}</p>

@@ -1,3 +1,100 @@
+import type { AllowedTaskId } from "../lib/tasks";
+import type { TemplateId } from "../lib/templates";
+
+// The keyed maps below are declared on their own so their key sets stay precise:
+// ja.ts checks its copies with `satisfies Record<…Key, …>`, so a missing or
+// extra key is a compile error. Inside `en` they are widened to string-indexed
+// records, which is what the components look them up with.
+
+export interface TaskItemText {
+  name: string;
+  summary: string;
+  /** Short "input → output" hint shown under the name, in monospace. */
+  tagline: string;
+}
+const taskItems = {
+  parity: {
+    name: "Permutation parity",
+    summary: "Decide whether a shuffled list needs an even or odd number of swaps to sort.",
+    tagline: "2 0 1  →  +1 / -1",
+  },
+  groebner_basis: {
+    name: "Gröbner basis",
+    summary: "Compute the Gröbner basis of a pair of polynomials.",
+    tagline: "f1 | f2  →  Gröbner basis",
+  },
+  integer_factorization: {
+    name: "Prime factor listing",
+    summary: "List the prime factors of a given integer.",
+    tagline: "2310  →  2 | 3 | 5 | 7 | 11",
+  },
+  gf17_addition: {
+    name: "Modular running sums",
+    summary: "Add up a list of numbers step by step, wrapping around at 17 (finite-field arithmetic).",
+    tagline: "5,9,3,4  →  5,14,0,4",
+  },
+  eigvec_3x3: {
+    name: "Dominant eigenvector",
+    summary: "Find the main direction (top eigenvector) of a 3×3 symmetric matrix, on real-valued data.",
+    tagline: "3×3 matrix  →  eigenvector",
+  },
+  polynomial_addition: {
+    name: "Polynomial addition",
+    summary: "Add a sequence of polynomials step by step (cumulative sums).",
+    tagline: "p1 | p2 | …  →  p1 | p1+p2 | …",
+  },
+} satisfies Record<AllowedTaskId, TaskItemText>;
+export type TaskItemId = keyof typeof taskItems;
+
+export interface TemplateText {
+  /** Chip label. The task name a template seeds stays ASCII (templates.ts `name`). */
+  name: string;
+  /** One plain line for non-technical users (no jargon). */
+  summary: string;
+}
+const templateTexts = {
+  custom: { name: "Start from scratch", summary: "Define your own problem-and-answer rule from scratch." },
+  gcd: {
+    name: "Greatest common divisor",
+    summary: "Given two whole numbers, find the largest number that divides both.",
+  },
+  integer_factorization: {
+    name: "Prime factorization",
+    summary: "Break a number down into the prime numbers that multiply to make it.",
+  },
+  pca: {
+    name: "Principal component",
+    summary: "From a small cloud of 2-D points, find the main direction they spread along.",
+  },
+} satisfies Record<TemplateId, TemplateText>;
+
+const treeNotes = {
+  core: "the task logic (generator, metrics)",
+  configs: "your settings",
+  scripts: "run these: generate, train, evaluate",
+  shared: "utilities shared by every task",
+};
+export type TreeNoteKey = keyof typeof treeNotes;
+
+export interface StatText {
+  label: string;
+  desc: string;
+}
+const statTexts = {
+  input_length: { label: "Problem length", desc: "How many pieces each problem is made of." },
+  output_length: { label: "Answer length", desc: "How many pieces each answer is made of." },
+  input_chars: { label: "Problem size", desc: "How many characters long each problem is." },
+  output_chars: { label: "Answer size", desc: "How many characters long each answer is." },
+  max_abs_value: { label: "Biggest number", desc: "The largest integer in each problem, ignoring its sign (0 if there is none)." },
+  num_elements: { label: "Number of parts", desc: "How many parts the problem is split into (by the “|” symbol)." },
+};
+export type StatKey = keyof typeof statTexts;
+
+export interface HowStep {
+  title: string;
+  body: string;
+}
+
 export const en = {
   nav: {
     brand: "CALT",
@@ -11,6 +108,8 @@ export const en = {
   welcome: {
     title: "Build a CALT project,",
     titleHighlight: "ready to train",
+    /** Joins title and titleHighlight where they share a line (phones): a space in English. */
+    titleJoiner: " ",
     subtitle:
       "Pick ready-made tasks, adjust a few settings, and download a complete project that's ready to train on your own machine with a few copy-paste commands.",
     nameLabel: "Name your project",
@@ -19,9 +118,10 @@ export const en = {
     nameHelpEmpty:
       "This only sets the name of the downloaded project folder. You can rename it anytime.",
     namedAs: (snake: string) => `Your project folder will be named “${snake}”.`,
+    nameDropped: "Folder names use only a–z, 0–9 and _, so other characters become _ or are left out.",
     nameErrors: {
       empty: "Please enter a project name.",
-      invalid: "Use letters, numbers, spaces, hyphens or underscores.",
+      invalid: "Include at least one letter (a–z) or digit (0–9). Folder names keep only a–z, 0–9 and _.",
       tooLong: "The folder name would be over 40 characters. Choose a shorter name.",
     },
     howTitle: "How it works",
@@ -36,9 +136,9 @@ export const en = {
       },
       {
         title: "Download",
-        body: "Get the full project, or just the tasks, as a ready-to-run ZIP.",
+        body: "Get the full project as a ready-to-run ZIP.",
       },
-    ],
+    ] as [HowStep, HowStep, HowStep],
     trustBrowser: "Runs in your browser, nothing uploaded",
     trustSetup: "No technical setup to use the builder",
     trustOpen: "Built on the open-source CALT library",
@@ -54,7 +154,6 @@ export const en = {
     selectAll: "Select all",
     clearAll: "Clear all",
     needsSage: "needs SageMath",
-    buildOwnEyebrow: "Custom",
     buildOwnTitle: "Build your own task",
     buildOwnDesc: "Write your own data recipe, or have an AI write it for you.",
     includeCustom: "Include in project",
@@ -68,47 +167,21 @@ export const en = {
     nameReserved: (folder: string) =>
       `“${folder}” clashes with a name that Python, an installed package, the generated scripts or the operating system already use, so it can't be a task folder. Choose another name.`,
     nameTooLong: "The folder name would be over 40 characters. Choose a shorter name.",
-    nameFallback: "This name has no letters or numbers to use, so the task folder will be named “my_task”.",
+    nameFallback: "This name has no a–z or 0–9 characters, so the task folder will be named “my_task”.",
     nameFallbackEmpty: "Without a name, the task folder will be named “my_task”.",
+    folderAs: (folder: string) => `The task folder will be named “${folder}”.`,
+    nameDropped: "Folder names use only a–z, 0–9 and _, so other characters become _ or are left out.",
     customNameAlert: (message: string) => `Your own task: ${message}`,
-    measurements: "What to measure (optional)",
     measurementsHint: "Statistics computed about your custom task's data.",
-    tokenizer: "Tokenizer / vocabulary (optional)",
-    optionsLabel: "Options",
     tabGenerator: "Generator",
     tabTokenizer: "Tokenizer",
-    tabMeasure: "Measurements",
+    tabMeasure: "Stats",
     sectionTabs: "Custom task sections",
-    items: {
-      parity: {
-        name: "Permutation parity",
-        summary: "Decide whether a shuffled list needs an even or odd number of swaps to sort.",
-      },
-      groebner_basis: {
-        name: "Gröbner basis",
-        summary: "Compute the Gröbner basis of a pair of polynomials.",
-      },
-      border_basis: {
-        name: "Border basis",
-        summary: "Compute the border basis of a zero-dimensional polynomial ideal.",
-      },
-      integer_factorization: {
-        name: "Prime factor listing",
-        summary: "List the prime factors of a given integer.",
-      },
-      gf17_addition: {
-        name: "Modular running sums",
-        summary: "Add up a list of numbers step by step, wrapping around at 17 (finite-field arithmetic).",
-      },
-      eigvec_3x3: {
-        name: "Dominant eigenvector",
-        summary: "Find the main direction (top eigenvector) of a 3×3 symmetric matrix, on real-valued data.",
-      },
-      polynomial_addition: {
-        name: "Polynomial addition",
-        summary: "Add a sequence of polynomials step by step (cumulative sums).",
-      },
-    } as Record<string, { name: string; summary: string }>,
+    items: taskItems as Record<string, TaskItemText>,
+    templates: templateTexts as Record<TemplateId, TemplateText>,
+    needsDeps: (deps: string) => `needs ${deps}`,
+    /** Settings tab label for a custom task whose name is empty. */
+    customTabFallback: "My task",
   },
   data: {
     recipeNote: "Keep a class with __call__(self, seed) that returns a (problem, answer) pair of text.",
@@ -117,6 +190,8 @@ export const en = {
     editsLexer: "This becomes experiments/toy/configs/lexer.yaml. Edit it there later if your generator changes.",
     tabWrite: "Write code",
     tabAi: "Ask an AI to write it",
+    /** Accessible name of the Write code / Ask an AI toggle. */
+    modeLabel: "How to write the code",
     aiIntro:
       "Don't want to write code? Describe your idea, copy the prompt, and paste it into any AI assistant (ChatGPT, Claude, Gemini). Then paste its reply into the “Write code” tab.",
     aiDescLabel: "Describe your task: input, output, and assumptions",
@@ -135,7 +210,7 @@ export const en = {
     measureDescLabel: "Describe what you want to measure",
     measureDescPlaceholder: "e.g. how many prime numbers appear in the answer",
     measureCodeNote:
-      'Add one line per measurement, like stats["my_measure"] = len(str(answer).split()). You can use re, math, and _ints(text), which lists the numbers in a string.',
+      'Add one line per measurement, like stats["my_measure"] = len(str(answer).split()). You can use re, math, and _ints(text), which lists the integers in a string.',
   },
   review: {
     eyebrow: "Step 3",
@@ -146,15 +221,13 @@ export const en = {
     saved: "Saved. See “How to use it” below.",
     downloadBlocked: "Your own task's name can't be used. Go back to Step 1 and rename it.",
     downloadFailed: "The download could not be created. Reload the page and try again.",
-    settings: "Custom task settings",
-    optional: "optional",
-    examplesQ: "Training sample size",
-    examplesInfoTitle: "Number of examples",
+    examplesQ: "Number of training examples",
+    examplesInfoTitle: "Number of training examples",
     examplesInfo:
       "More examples usually help the model learn better, but take longer to prepare and train. “Balanced” is a good default; use “Quick” to test the pipeline faster, or “Thorough” for the best results.",
     sizeQuick: "Quick",
     sizeBalanced: "Balanced",
-    sizeThorough: "Intense",
+    sizeThorough: "Thorough",
     brainQ: "Model size",
     brainInfoTitle: "Model size",
     brainInfo:
@@ -184,7 +257,7 @@ export const en = {
     arch: "Model architecture",
     archInfoTitle: "Model architecture",
     archInfo:
-      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the HuggingFace variant. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead and runs one causal stack over the problem followed by its solution. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot; it needs expanded-form data.",
+      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the Hugging Face implementation. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead: it reads the problem and writes the solution as one continuous sequence. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot; it needs data written as coefficient/exponent (C/E) tokens.",
     archStandard: "Standard",
     archBart: "BART",
     archEncoderOnly: "Encoder only",
@@ -193,38 +266,33 @@ export const en = {
     archNoteGeneric:
       "The default encoder-decoder. Works for any sequence-to-sequence task.",
     archNoteBart:
-      "HuggingFace BART. Same task shape as Standard, different implementation.",
+      "Hugging Face BART. Same task shape as Standard, different implementation.",
     archNoteEncoderClassifier:
       "No decoder: predicts one token. Use it when the target is a single label.",
     archNoteDecoderOnly:
-      "One causal stack over problem and solution. The usual choice for arithmetic tasks.",
+      "Reads the problem, then writes the solution as one continuous sequence, one token at a time.",
     archNoteMonomial:
-      "One position per monomial. Much shorter polynomial sequences; needs expanded-form data.",
+      "One position per monomial. Much shorter polynomial sequences; needs data written as coefficient/exponent (C/E) tokens.",
     rounds: "Training rounds",
     roundsInfoTitle: "Training rounds",
     roundsInfo:
-      "How many times the model reviews all the examples while learning. More rounds can improve accuracy up to a point.",
+      "How many times the model goes through all the training examples (each pass is called an epoch). More rounds can improve accuracy up to a point.",
     logging: "Progress logging",
     loggingInfoTitle: "Weights & Biases",
     loggingInfo:
-      "An optional online dashboard for tracking training (Weights & Biases). If you turn it on, it's added to your install. You'll just need a free account and to run “wandb login” once. Leave it off otherwise.",
+      "An optional online dashboard for following training as it runs (Weights & Biases). It is already installed with CALT; to use it, you need a free account, and you must run “wandb login” once. Leave it off if you don't need it.",
     on: "On",
     off: "Off",
     treeTitle: "What's inside",
     treeBody: "The files in your download. Edit any of them later for local tweaks.",
-    treeNotes: {
-      core: "the task logic (generator, metrics)",
-      configs: "customized at Step 2",
-      scripts: "run these: generate, train, evaluate",
-      shared: "utilities shared by every task",
-    } as Record<string, string>,
+    treeNotes: treeNotes as Record<string, string>,
     howToUse: "How to use it",
     prereq: "You'll need conda and a terminal. Just copy-paste the commands below.",
     howUnzipProject: (proj: string) => `Unzip ${proj}.zip (a complete CALT project).`,
-    howInstall: "Install everything once with conda (full details in README.md).",
+    howInstall: "Install everything once with conda (commands under “One-time setup commands” below; full details in README.md).",
     howRun: "Then open a terminal and, for each task, run:",
     setupLabel: "One-time setup commands",
-    sTasks: "Tasks",
+    taskCount: (n: number) => (n === 1 ? "1 task" : `${n} tasks`),
     back: "Back",
   },
   lexer: {
@@ -259,11 +327,10 @@ export const en = {
     title: "Settings",
     subtitle: "Fine-tune each task's training settings. The defaults already work well.",
     appliesNote:
-      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of examples, train.yaml for the model size, training rounds, position embedding and logging, and lexer.yaml for the tokenizer vocabulary.",
+      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of training examples, train.yaml for the model size, position embedding, architecture, training rounds and logging, and lexer.yaml for the tokenizer vocabulary.",
     noTasks: "No tasks selected yet. Go back and pick at least one.",
     continueLabel: "Continue",
     previewLegend: "This is what your settings write into the task's config files. Highlighted lines are the ones the controls edit; a line flashes when it changes.",
-    previewLexer: "Tokenizer vocabulary",
     previewFiles: "Config file",
   },
   details: {
@@ -273,7 +340,7 @@ export const en = {
     tasks:
       "A CALT task frames a math problem as a translation: an input string (the problem) maps to an output string (the answer). You define one instance generator that returns (problem, answer) pairs from a seed; the example cards are ready-made generators you can add as they are.",
     settings:
-      "These controls set the dataset size, the Transformer model size, how many training rounds run, and how token positions are encoded. Each one is written into the task's data.yaml / train.yaml, shown live on the right.",
+      "These controls set the dataset size, the model size and architecture, how token positions are encoded, how many training rounds run, and whether training is logged online. Each one is written into the task's data.yaml / train.yaml and shown live in the preview.",
     finish:
       "Your download is a complete, runnable CALT project: one folder per task (generator, configs, scripts), shared utilities, a pinned pyproject.toml and a README. The workflow is generate → train → evaluate.",
   },
@@ -283,18 +350,21 @@ export const en = {
   a11y: {
     decrease: "Decrease",
     increase: "Increase",
-    remove: "Remove",
     whatsThis: "What's this?",
     settingsTabs: "Settings for each task",
+    skipToContent: "Skip to content",
   },
-  stats: {
-    input_length: { label: "Problem length", desc: "How many pieces each problem is made of." },
-    output_length: { label: "Answer length", desc: "How many pieces each answer is made of." },
-    input_chars: { label: "Problem size", desc: "How many characters long each problem is." },
-    output_chars: { label: "Answer size", desc: "How many characters long each answer is." },
-    max_abs_value: { label: "Biggest number", desc: "The largest number that appears in each problem." },
-    num_elements: { label: "Number of parts", desc: "How many parts the problem is split into (by the “|” symbol)." },
-  } as Record<string, { label: string; desc: string }>,
+  code: {
+    copy: "Copy",
+    copied: "Copied",
+  },
+  /** Shown by ErrorBoundary, which renders outside the language provider. */
+  errorBoundary: {
+    title: "Something went wrong",
+    body: "The builder hit an unexpected error. Your downloaded projects are unaffected. Reloading the page usually fixes it.",
+    reload: "Reload",
+  },
+  stats: statTexts as Record<string, StatText>,
 };
 
 export type Dict = typeof en;

@@ -5,7 +5,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 import { ChevronDown, Minus, Plus } from "lucide-react";
-import { useT } from "../../i18n";
+import { useI18n } from "../../i18n";
 import { cn } from "../../lib/utils";
 
 export function Field({
@@ -85,7 +85,7 @@ export function NumberStepper({
   step?: number;
   suffix?: string;
 }) {
-  const t = useT();
+  const { t, lang } = useI18n();
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
   return (
     <div className="flex h-11 items-center rounded-xl bg-surface ring-1 ring-ink-200 focus-within:ring-2 focus-within:ring-brand-500">
@@ -99,7 +99,7 @@ export function NumberStepper({
         <Minus size={16} />
       </button>
       <div className="flex flex-1 items-center justify-center gap-1 text-sm font-semibold tabular-nums text-ink-800">
-        {value.toLocaleString()}
+        {value.toLocaleString(lang)}
         {suffix && <span className="text-xs font-normal text-ink-400">{suffix}</span>}
       </div>
       <button

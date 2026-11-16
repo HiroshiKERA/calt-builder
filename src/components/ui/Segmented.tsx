@@ -13,11 +13,18 @@ export function Segmented<T extends string>({
   value,
   onChange,
   ariaLabel,
+  layoutKey,
 }: {
   options: SegmentedOption<T>[];
   value: T;
   onChange: (v: T) => void;
   ariaLabel?: string;
+  /**
+   * Fixed, untranslated id for the sliding highlight (framer-motion layoutId).
+   * Keep it stable across languages and remounts: switching task tabs in
+   * Settings slides the highlight because the remounted control reuses it.
+   */
+  layoutKey: string;
 }) {
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -66,12 +73,16 @@ export function Segmented<T extends string>({
           >
             {active && (
               <motion.span
-                layoutId={`seg-${ariaLabel ?? "x"}`}
+                layoutId={`seg-${layoutKey}`}
                 className="absolute inset-0 rounded-lg bg-surface shadow-soft"
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
               />
             )}
-            <span className="relative z-10 flex items-center gap-1.5">
+            {/* break-keep: Japanese would otherwise break between any two
+                characters and, squeezed in a narrow button, stack one character
+                per line. Labels break only at spaces or a U+200B break hint
+                (e.g. "エンコーダ\u200Bのみ"); no effect on English. */}
+            <span className="relative z-10 flex items-center gap-1.5 break-keep">
               {o.icon}
               {o.label}
             </span>

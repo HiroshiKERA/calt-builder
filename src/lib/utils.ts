@@ -79,6 +79,17 @@ export function isValidIdentifier(name: string): boolean {
   return /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
 }
 
+/**
+ * True when toSnakeCase changes characters other than the expected ones: any
+ * character but ASCII letters, digits, spaces, hyphens and underscores becomes
+ * "_" (or disappears at either end), while at least one usable character is
+ * kept. Spaces and hyphens becoming "_" and upper case being lowered are
+ * expected and do not count.
+ */
+export function dropsCharacters(name: string): boolean {
+  return /[^A-Za-z0-9\s_-]/.test(name) && toSnakeCase(name) !== "";
+}
+
 export type FolderNameError = "empty" | "invalid" | "tooLong";
 
 /**

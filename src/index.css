@@ -4,6 +4,12 @@
 @tailwind utilities;
 
 @layer base {
+  /* Japanese line-breaking rules (kinsoku): never start a line with ー, a small
+     kana or closing punctuation. Inherited by every Japanese element. */
+  html:lang(ja) {
+    line-break: strict;
+  }
+
   :root {
     color-scheme: light;
     --ink-50: 247 248 250;

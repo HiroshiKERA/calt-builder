@@ -200,7 +200,7 @@ export function StepReview() {
           <ArrowLeft size={18} /> {t.review.back}
         </Button>
         <div className="flex items-center gap-2 text-sm text-ink-400">
-          <Boxes size={15} /> {taskCount} {t.review.sTasks}
+          <Boxes size={15} /> {t.review.taskCount(taskCount)}
         </div>
       </div>
     </div>
