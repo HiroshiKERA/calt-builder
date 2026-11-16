@@ -14,6 +14,7 @@
 #   1. python generate.py             # raw text data from SageMath (if not already done)
 #   2. python preprocess.py [flags]   # build the pretokenized cache (unless --no-preprocess)
 #   3. python train.py [flags]        # train + evaluate (cache picked up automatically)
+#   4. python evaluate.py --training_order <order>   # print the success rate and examples
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -93,33 +94,33 @@ sed "s|lexer_config:.*|lexer_config: $LEXER_PATH|" ../configs/train.yaml > "$TMP
 
 # ------------- Step 1: generate ------------------------------------------
 if [[ ! -f ../data/QQ/train_raw.txt ]]; then
-    echo "=== Step 1/3: Generate data ==="
+    echo "=== Step 1/4: Generate data ==="
     "$PY" generate.py
 else
-    echo "=== Step 1/3: Generate data ==="
+    echo "=== Step 1/4: Generate data ==="
     echo "    ../data/QQ/train_raw.txt already exists, skipping (delete to regenerate)"
 fi
 
 # ------------- Step 2: preprocess (optional) -----------------------------
 if [[ $PREPROCESS -eq 1 ]]; then
-    echo "=== Step 2/3: Preprocess (build cache) ==="
+    echo "=== Step 2/4: Preprocess (build cache) ==="
     "$PY" preprocess.py \
         --config_path "$TMP_TRAIN_YAML" \
         --training_order "$ORDER" \
         $FORCE
 else
-    echo "=== Step 2/3: Preprocess SKIPPED (--no-preprocess) ==="
+    echo "=== Step 2/4: Preprocess SKIPPED (--no-preprocess) ==="
 fi
 
 # ------------- Step 3: train + evaluate ----------------------------------
-echo "=== Step 3/3: Train + Evaluate ==="
+echo "=== Step 3/4: Train ==="
 "$PY" train.py \
     --config_path "$TMP_TRAIN_YAML" \
     --training_order "$ORDER" \
     $DRYRUN
 
-echo "=== Step 4/3: Evaluate (optional, results already printed by train) ==="
-"$PY" evaluate.py --training_order "$ORDER" || echo "(evaluate.py is optional — train.py already wrote eval_results/)"
+echo "=== Step 4/4: Evaluate ==="
+"$PY" evaluate.py --training_order "$ORDER"
 
 echo "================================================================="
 echo "  DONE. Output: ../outputs/results_${ORDER}/"
