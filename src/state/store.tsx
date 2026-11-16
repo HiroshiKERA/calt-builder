@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { type BuildConfig, type LexerConfig, type ModelPreset, type ModelType, type PosEmbedding } from "../lib/codegen";
+import { shippableModelType, type BuildConfig, type LexerConfig, type ModelPreset, type ModelType, type PosEmbedding } from "../lib/codegen";
 import { defaultSelectedStats } from "../lib/stats";
 import { customNameIssue, usesFallbackFolder, type CustomNameIssue } from "../lib/names";
 import { legacyTemplateRename } from "../lib/templates";
@@ -131,6 +131,17 @@ function loadPersisted(): Persisted {
         code: code ? renameTaskInCode(code, config.custom.name, legacy) : code,
       };
     }
+    // An architecture that is no longer offered (Monomial) falls back to the
+    // default globally; a per-task override of it is dropped so the task
+    // inherits the global value. Settings then never shows a disabled choice.
+    config.modelType = shippableModelType(config.modelType);
+    config.perTaskSettings = Object.fromEntries(
+      Object.entries(config.perTaskSettings ?? {}).map(([id, s]) => {
+        if (!s?.modelType || shippableModelType(s.modelType) === s.modelType) return [id, s];
+        const { modelType: _dropped, ...rest } = s;
+        return [id, rest];
+      }),
+    );
     const step = Math.max(0, Math.min(LAST_STEP, saved.step ?? 0));
     return { config, step };
   } catch {

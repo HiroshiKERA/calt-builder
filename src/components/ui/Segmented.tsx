@@ -6,6 +6,9 @@ export interface SegmentedOption<T extends string> {
   value: T;
   label: string;
   icon?: React.ReactNode;
+  /** Shown but not selectable (skipped by the arrow keys); `title` says why. */
+  disabled?: boolean;
+  title?: string;
 }
 
 export function Segmented<T extends string>({
@@ -27,14 +30,21 @@ export function Segmented<T extends string>({
   layoutKey: string;
 }) {
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  // The tab stop is the active option, or the first enabled one if the active
+  // option is disabled (or missing), so keyboard users can always reach the group.
+  const activeIdx = options.findIndex((o) => o.value === value && !o.disabled);
+  const tabStop = activeIdx >= 0 ? activeIdx : options.findIndex((o) => !o.disabled);
 
   const move = (dir: 1 | -1) => {
     const i = options.findIndex((o) => o.value === value);
-    const nextIdx = (i + dir + options.length) % options.length;
-    const next = options[nextIdx];
-    if (next) {
-      onChange(next.value);
-      btnRefs.current[nextIdx]?.focus();
+    for (let step = 1; step < options.length; step++) {
+      const nextIdx = (i + dir * step + options.length * step) % options.length;
+      const next = options[nextIdx];
+      if (next && !next.disabled) {
+        onChange(next.value);
+        btnRefs.current[nextIdx]?.focus();
+        return;
+      }
     }
   };
 
@@ -55,7 +65,9 @@ export function Segmented<T extends string>({
             ref={(el) => (btnRefs.current[idx] = el)}
             role="radio"
             aria-checked={active}
-            tabIndex={active ? 0 : -1}
+            disabled={o.disabled}
+            title={o.title}
+            tabIndex={idx === tabStop ? 0 : -1}
             onClick={() => onChange(o.value)}
             onKeyDown={(e) => {
               if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -68,7 +80,7 @@ export function Segmented<T extends string>({
             }}
             className={cn(
               "relative flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand-400/40",
-              active ? "text-ink-900" : "text-ink-500 hover:text-ink-700",
+              active ? "text-ink-900" : o.disabled ? "cursor-not-allowed text-ink-400 opacity-60" : "text-ink-500 hover:text-ink-700",
             )}
           >
             {active && (

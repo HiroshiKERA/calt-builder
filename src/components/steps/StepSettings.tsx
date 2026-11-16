@@ -127,7 +127,8 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
             { value: "bart", label: t.review.archBart },
             { value: "encoder_classifier", label: t.review.archEncoderOnly },
             { value: "decoder_only", label: t.review.archDecoderOnly },
-            { value: "monomial", label: t.review.archMonomial },
+            // Not selectable yet; see UNAVAILABLE_MODEL_TYPES in lib/codegen.ts.
+            { value: "monomial", label: t.review.archMonomial, disabled: true, title: t.review.archNoteMonomial },
           ]}
         />
         <p className="mt-2 text-xs text-ink-500">{modelTypeNote[settings.modelType]}</p>

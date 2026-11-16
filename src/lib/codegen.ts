@@ -37,6 +37,21 @@ export type ModelType =
   | "decoder_only"
   | "monomial";
 
+/**
+ * Architectures the Settings screen shows but cannot offer yet. `monomial` needs
+ * a C/E (coefficient/exponent) lexer plus model.num_variables. The site writes
+ * neither: every task ships with its raw lexer (groebner_basis also has a
+ * lexer_expanded.yaml, but nothing selects it), so calt stops with "No
+ * coefficient tokens" when it builds the model. Supporting it means choosing a
+ * C/E lexer per task and writing num_variables, not just one config key.
+ */
+export const UNAVAILABLE_MODEL_TYPES: ReadonlySet<ModelType> = new Set<ModelType>(["monomial"]);
+
+/** The architecture actually written out: an unavailable one (e.g. from an older session) becomes the default. */
+export function shippableModelType(t: ModelType): ModelType {
+  return UNAVAILABLE_MODEL_TYPES.has(t) ? "generic" : t;
+}
+
 // User-editable tokenizer settings (lexer.yaml). Mirrors the real CALT schema:
 // vocab.range.numbers, vocab.misc, number_policy.{attach_sign,digit_group,allow_float}.
 export interface LexerConfig {
@@ -312,7 +327,7 @@ function trainYaml(cfg: BuildConfig, snake: string): string {
   const m = MODEL_PRESETS[cfg.modelPreset];
   return `# Model + training configuration for the ${snake} toy experiment.
 model:
-  model_type: ${cfg.modelType}
+  model_type: ${shippableModelType(cfg.modelType)}
   num_encoder_layers: ${m.layers}
   num_encoder_heads: ${m.heads}
   num_decoder_layers: ${m.layers}

@@ -151,7 +151,8 @@ which parts are edited" feature.
 
 Dataset size presets: **10,000 / 100,000 / 1,000,000** train (professor's request).
 Model size (small/medium/large), **Position embedding** (Learned[=generic]/Sinusoidal/
-RoPE/None), **Model architecture** (Standard/BART/Encoder only/Decoder only/Monomial),
+RoPE/None), **Model architecture** (Standard/BART/Encoder only/Decoder only;
+Monomial shown but disabled, see `UNAVAILABLE_MODEL_TYPES`),
 training rounds (epochs — renamed from "Practice rounds"), and a Weights & Biases
 logging toggle. The ConfigPreview sits beside these (below them under 1280px).
 
