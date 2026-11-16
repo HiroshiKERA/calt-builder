@@ -56,9 +56,11 @@ conda activate calt-env
 pip install ${CALT_REQUIREMENT} matplotlib click
 \`\`\`
 
-> **Note**: pin \`${CALT_REQUIREMENT}\` rather than an older release. It carries the
-> embedding normalization fix, without which the model learns the shape of the output
-> but not the values in it.
+> **Note**: install exactly \`${CALT_REQUIREMENT}\`, the version this project was
+> tested with. pip also installs the newest \`transformers\`, and calt-x 1.5.0 or
+> earlier stops as soon as training starts with
+> \`AttributeError: 'TrainingArguments' object has no attribute 'warmup_ratio'\`.
+> If you see that error, run \`pip install ${CALT_REQUIREMENT}\` in \`calt-env\`.
 
 Check it worked:
 

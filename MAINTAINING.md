@@ -8,12 +8,15 @@ for the full architecture and the multi-repo picture.
 
 1. **The engine `calt-x`** is not in the ZIP. The user installs it with conda:
    create a `calt-env` environment (SageMath from conda-forge) then
-   `pip install calt-x==1.5.0 matplotlib click`
+   `pip install calt-x==1.6.0 matplotlib click`
    (omegaconf ships with calt-x, so it is not listed here).
    The bundled tasks import `calt.io.preprocess`. The generated `README.md` walks
    the user through it. 1.4.0 added the monomial embedding (`model_type: monomial`);
-   1.5.0 added the decoder-only model (`model_type: decoder_only`) and, more
-   importantly, the embedding normalization fix, so do not pin lower.
+   1.5.0 added the decoder-only model (`model_type: decoder_only`) and the
+   embedding normalization fix; 1.6.0 is the first release that trains on
+   transformers 5.15 or later. calt-x leaves transformers unbounded, so a fresh
+   install resolves the newest one, and 1.5.0 and earlier crash at training
+   start on it: do not pin lower.
 
 2. **The task files** (generators, configs, `shared/`, scripts) are a frozen
    snapshot in `src/generated/projectFiles.ts`, regenerated from the **vendored
@@ -23,13 +26,15 @@ for the full architecture and the multi-repo picture.
    gf17_addition, eigvec_3x3, polynomial_addition (border_basis is dropped).
 
 3. **Site-owned packaging** (`project-files/pyproject.toml`) carries the calt-x
-   pin. **The version now lives in one place, `src/lib/caltVersion.ts`**; the
-   README, the review step and `applySettings` in `zip.ts` all read it, and
-   `zip.ts` rewrites the pin inside `pyproject.toml` at download time so the
-   bundled snapshot cannot drift. To bump the engine, edit that constant, then
-   `npm run bundle && npm run build`. No install scripts — install is conda-based.
+   pin. **The version is defined in `src/lib/caltVersion.ts`**; the README and
+   the review step read it. The same pin is also baked into
+   `project-files/pyproject.toml` and the bundle, and `npm run build` fails
+   (`scripts/check-bundle.mjs`) if they disagree with the constant. To bump the
+   engine, see *Bumping the calt-x version*. No install scripts — install is
+   conda-based.
 
-Each project also gets `CALT_SNAPSHOT.txt` (bundle date + the calt-x source line).
+Each project also gets `CALT_SNAPSHOT.txt` (bundle date + the calt-x pin, stamped
+from `project-files/pyproject.toml` at bundle time).
 
 ## Refreshing the task snapshot (do this deliberately, then test)
 
@@ -70,18 +75,37 @@ patches `experiments/toy/configs/{data,train}.yaml` by key name
 
 ## Bumping the calt-x version
 
-The engine is pinned to `calt-x==1.5.0` (PyPI). The version lives in **one** place:
+The engine is pinned to `calt-x==1.6.0` (PyPI). The version is defined by
+`CALT_VERSION` in `src/lib/caltVersion.ts`; `npm run build` refuses to build if
+`project-files/pyproject.toml` or the bundle disagrees with it.
 
-1. Test a task end to end against the new version (`pip show calt-x`).
-2. Edit `CALT_VERSION` in `src/lib/caltVersion.ts`. That is the whole change.
-   `projectReadme.ts` and `StepReview.tsx` read the constant, and `applySettings`
-   in `zip.ts` rewrites the pin inside the bundled `pyproject.toml` at download
-   time, so the ZIP can never drift from it.
-3. Rebuild and redeploy. Re-bundling is only needed if a task source changed.
+1. Read the engine's release notes (Compatibility section) and its diff for
+   config changes: renamed or removed keys in `train.yaml` / `lexer.yaml`, new
+   validation, new or renamed `model_type` values, changed `requires-python`.
+2. Test a task end to end against the new version in a **fresh** environment
+   (`pip show calt-x transformers torch`). A fresh env matters: calt-x leaves
+   transformers and torch unbounded, so an old env hides what new users get.
+3. Edit `CALT_VERSION` in `src/lib/caltVersion.ts`. `projectReadme.ts` and
+   `StepReview.tsx` read the constant.
+4. Update the pin (and `requires-python`, if the engine's changed) in
+   `project-files/pyproject.toml`, then `npm run bundle`. Both are required:
+   `npm run build` fails until the bundle's `pyproject.toml` and
+   `CALT_SNAPSHOT.txt` match the constant.
+5. Re-read the text that explains *why* this version is pinned: the comments in
+   `caltVersion.ts` and `project-files/pyproject.toml`, the note in
+   `projectReadme.ts` (shipped to users), and the version mentions in
+   `README.md`, `MAINTAINING.md` and `AI_CONTEXT.md`. They name versions and
+   reasons that a bump can make false.
+6. `npm run build`, download a Full project ZIP from `npm run dev`, and check
+   that `pyproject.toml`, `README.md` and `CALT_SNAPSHOT.txt` all show the new pin.
+7. New `model_type` values are not picked up automatically: add them to
+   `ModelType` in `codegen.ts`, the options and notes in `StepSettings.tsx`, and
+   the strings in **both** `en.ts` and `ja.ts`. Check the engine's config
+   mapping for keys the new type requires: `MODEL_PRESETS`, `trainYaml` and
+   `applySettings` only write the encoder/decoder key pairs (e.g. `monomial`
+   also needs `model.num_variables` and expanded-form data).
 
-> `project-files/pyproject.toml` still holds a literal pin. It is the fallback the
-> bundle carries, and `zip.ts` overwrites it on the way out, so it can lag without
-> reaching a user. Keeping it in step is tidiness, not correctness.
+Work on a branch, not `main`: every push to `main` deploys the site.
 
 > Related: the **Position embedding** "Learned" option writes the value `generic`.
 > The engine also accepts `learned` as an alias, so emitting `learned` instead is

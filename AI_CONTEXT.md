@@ -40,7 +40,7 @@ What a user downloads is assembled from two sources baked into
    the generated README).
 
 3. **The engine `calt-x`** is in neither: the user installs it with conda + pip,
-   `pip install calt-x==1.5.0` (PyPI). The bundled tasks import `calt.io.preprocess`
+   `pip install calt-x==1.6.0` (PyPI). The bundled tasks import `calt.io.preprocess`
    (offline pre-tokenization). The version lives in one place,
    `src/lib/caltVersion.ts`; to bump it, see §11.
 
@@ -77,7 +77,7 @@ site/
 │   ├── i18n/                index.tsx provider + en.ts / ja.ts dictionaries
 │   ├── theme/ThemeProvider.tsx   Light/dark, toggles the `dark` class, persisted
 │   └── generated/projectFiles.ts   AUTO-GENERATED snapshot. Never edit by hand.
-├── project-files/pyproject.toml    Site-owned packaging (calt-x source; currently the git branch)
+├── project-files/pyproject.toml    Site-owned packaging (calt-x pin from PyPI)
 ├── scripts/
 │   ├── bundle-tasks.mjs     Builds projectFiles.ts from a framework path + project-files/
 │   └── sync-tasks.mjs       Clones the framework then runs the bundler
@@ -120,7 +120,8 @@ needsSage; names+summaries come from i18n (`tasks.items[id]`).
 - ready-made task → `TASK_FILES[id]` patched by `applySettings`.
 - custom task → `buildFiles(customConfig)` from `codegen.ts`.
 - `"project"` mode also adds `COMMON_FILES` (shared/ + pyproject + snapshot stamp)
-  and a generated root `README.md` (conda install instructions).
+  and a generated root `README.md` (conda install instructions). The calt-x pin in
+  the shipped pyproject is rewritten to `CALT_REQUIREMENT` on the way out.
 
 `applySettings` patches `experiments/toy/configs/`:
 - `data.yaml`: `num_train_samples`, `num_test_samples`.
@@ -167,7 +168,7 @@ Weights & Biases logging toggle. The ConfigPreview sits beside these.
 `bundle-tasks.mjs` regenerates `src/generated/projectFiles.ts`:
 - Reads task folders (any with `core/generator.py`) + `shared/` from a framework path.
 - Reads `pyproject.toml` from `project-files/`.
-- Writes `CALT_SNAPSHOT.txt` (date + the calt-x source line) into the project.
+- Writes `CALT_SNAPSHOT.txt` (date + the calt-x pin) into the project.
 
 Re-bundle from the vendored `task-sources/` (default source, no network):
 ```bash
@@ -178,14 +179,20 @@ npm run build
 
 ## 11. Project strategy, decisions, and OPEN loose ends (read this)
 
-- **Install = `calt-x==1.5.0` from PyPI.** The version is defined once, in
+- **Install = `calt-x==1.6.0` from PyPI.** The version is defined once, in
   `src/lib/caltVersion.ts`; `projectReadme.ts` and `StepReview.tsx` read the
-  constant, and `applySettings` in `zip.ts` rewrites the pin inside the bundled
-  `pyproject.toml` at download time. Bump the constant, nothing else.
-  Do not pin below 1.5.0: it carries the fix that normalizes the token+position
-  sum before the transformer stack. Without it the residual stream enters the
-  stack about 35x smaller than what the layers add to it, and the model learns
-  output structure but not the values inside it.
+  constant, and `projectFileMap` in `zip.ts` rewrites the pin line inside the
+  bundled (shared) `pyproject.toml` at download time. `project-files/pyproject.toml`
+  and the bundle carry the same pin; `scripts/check-bundle.mjs` (run by
+  `npm run build`) fails if they disagree (MAINTAINING.md, *Bumping the calt-x
+  version*). Do not pin below 1.6.0: calt-x leaves transformers unbounded, a
+  fresh install resolves the newest one, and since transformers 5.15.0
+  (2026-08-10) calt-x 1.5.0 and earlier crash at training start (`warmup_ratio`,
+  calt #51; fixed in calt PR #54). 1.5.0 is itself the floor for
+  the fix that normalizes the token+position sum before the transformer stack.
+  Without it the residual stream enters the stack about 35x smaller than what
+  the layers add to it, and the model learns output structure but not the values
+  inside it.
 - **Position embedding value = `generic`, label "Learned".** The engine's
   `get_positional_embedding` historically accepted only `generic/sinusoidal/rope/none`
   ("learned" raised). The fix making "learned" an alias is now **on calt `main`**
@@ -218,7 +225,7 @@ npm run build
 - `ja.ts` must stay key-for-key in sync with `en.ts`.
 - `applySettings` depends on the exact YAML keys in the bundled toy configs.
 - Per-task custom settings live under the `"__custom"` key.
-- The install currently targets a git branch (see §11); treat changing it as deliberate.
+- The install pins a PyPI release (see §11); treat changing it as deliberate.
 - `base: "./"` in `vite.config.ts` keeps asset paths relative for subpath hosting.
 - Node isn't on the default PATH on the dev box; this project was built with a conda
   `nodejs` env: `conda activate nodejs` then `npm run build` / `npm run dev`.
