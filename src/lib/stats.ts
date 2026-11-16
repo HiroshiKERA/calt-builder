@@ -60,7 +60,7 @@ export const STATS: StatDef[] = [
     label: "max_abs_value",
     friendlyLabel: "Biggest number",
     description: "Largest absolute integer appearing in the input (0 if none).",
-    friendlyDescription: "The largest number that appears in each problem.",
+    friendlyDescription: "The largest number in each problem, ignoring its sign.",
     expr: "max((abs(v) for v in _ints(problem)), default=0)",
     needsInts: true,
   },

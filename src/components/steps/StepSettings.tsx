@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { PackageOpen, ArrowLeft } from "lucide-react";
 import { useWizard, hasSelection, customBuildConfig, customTaskIssue, type TaskSettings } from "../../state/store";
-import { useT } from "../../i18n";
+import { useI18n, useT } from "../../i18n";
 import { type ModelPreset, type ModelType, type PosEmbedding } from "../../lib/codegen";
 import { ConfigPreview } from "../ConfigPreview";
 import { Card, SectionLabel } from "../ui/Card";
@@ -26,7 +26,7 @@ interface TaskSettingsFormProps {
 }
 
 function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
-  const t = useT();
+  const { t, lang } = useI18n();
 
   const activeSize = SIZE_PRESETS.find((p) => p.train === settings.numTrain)?.value ?? "balanced";
   const sizeLabel: Record<string, string> = {
@@ -62,14 +62,14 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
           <InfoHint title={t.review.examplesInfoTitle}><p>{t.review.examplesInfo}</p></InfoHint>
         </div>
         <Segmented
-          ariaLabel="dataset size"
+          ariaLabel={t.review.examplesQ}
           layoutKey="dataset size"
           value={activeSize}
           onChange={(v) => {
             const p = SIZE_PRESETS.find((x) => x.value === v)!;
             onChange({ numTrain: p.train, numTest: p.test });
           }}
-          options={SIZE_PRESETS.map((p) => ({ value: p.value, label: `${sizeLabel[p.value]} · ${p.train.toLocaleString()}` }))}
+          options={SIZE_PRESETS.map((p) => ({ value: p.value, label: `${sizeLabel[p.value]} · ${p.train.toLocaleString(lang)}` }))}
         />
       </div>
 
@@ -79,7 +79,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
           <InfoHint title={t.review.brainInfoTitle}><p>{t.review.brainInfo}</p></InfoHint>
         </div>
         <Segmented
-          ariaLabel="model size"
+          ariaLabel={t.review.brainQ}
           layoutKey="model size"
           value={settings.modelPreset}
           onChange={(v) => onChange({ modelPreset: v as ModelPreset })}
@@ -98,7 +98,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
           <InfoHint title={t.review.posEmbInfoTitle}><p>{t.review.posEmbInfo}</p></InfoHint>
         </div>
         <Segmented
-          ariaLabel="position embedding"
+          ariaLabel={t.review.posEmb}
           layoutKey="position embedding"
           value={settings.posEmbedding}
           onChange={(v) => onChange({ posEmbedding: v as PosEmbedding })}
@@ -118,7 +118,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
           <InfoHint title={t.review.archInfoTitle}><p>{t.review.archInfo}</p></InfoHint>
         </div>
         <Segmented
-          ariaLabel="model architecture"
+          ariaLabel={t.review.arch}
           layoutKey="model architecture"
           value={settings.modelType}
           onChange={(v) => onChange({ modelType: v as ModelType })}

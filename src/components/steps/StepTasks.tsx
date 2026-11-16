@@ -194,7 +194,7 @@ function Measurements() {
         </div>
         <div className="space-y-4 border-t border-ink-100 p-3">
           <Segmented
-            ariaLabel="measure-mode"
+            ariaLabel={t.data.modeLabel}
           layoutKey="measure-mode"
             value={mode}
             onChange={(v) => setMode(v)}
@@ -307,7 +307,7 @@ function LexerEditor() {
           <InfoHint title={t.lexer.digitGroup}><p>{t.lexer.digitGroupInfo}</p></InfoHint>
         </div>
         <Segmented
-          ariaLabel="digit-group"
+          ariaLabel={t.lexer.digitGroup}
           layoutKey="digit-group"
           value={String(lx.digitGroup)}
           onChange={(v) => set({ digitGroup: toInt(v, lx.digitGroup) })}
@@ -485,7 +485,7 @@ function CustomBuilder() {
         {section === "generator" && (
           <div className="space-y-3">
             <Segmented
-              ariaLabel="recipe-mode"
+              ariaLabel={t.data.modeLabel}
           layoutKey="recipe-mode"
               value={mode}
               onChange={(v) => setMode(v)}

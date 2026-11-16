@@ -70,7 +70,7 @@ const templateTexts = {
 
 const treeNotes = {
   core: "the task logic (generator, metrics)",
-  configs: "customized at Step 2",
+  configs: "your settings",
   scripts: "run these: generate, train, evaluate",
   shared: "utilities shared by every task",
 };
@@ -85,7 +85,7 @@ const statTexts = {
   output_length: { label: "Answer length", desc: "How many pieces each answer is made of." },
   input_chars: { label: "Problem size", desc: "How many characters long each problem is." },
   output_chars: { label: "Answer size", desc: "How many characters long each answer is." },
-  max_abs_value: { label: "Biggest number", desc: "The largest number that appears in each problem." },
+  max_abs_value: { label: "Biggest number", desc: "The largest number in each problem, ignoring its sign." },
   num_elements: { label: "Number of parts", desc: "How many parts the problem is split into (by the “|” symbol)." },
 };
 export type StatKey = keyof typeof statTexts;
@@ -118,7 +118,7 @@ export const en = {
     namedAs: (snake: string) => `Your project folder will be named “${snake}”.`,
     nameErrors: {
       empty: "Please enter a project name.",
-      invalid: "Use letters, numbers, spaces, hyphens or underscores.",
+      invalid: "Include at least one letter (a–z) or digit. Folder names keep only a–z, 0–9 and _.",
       tooLong: "The folder name would be over 40 characters. Choose a shorter name.",
     },
     howTitle: "How it works",
@@ -133,7 +133,7 @@ export const en = {
       },
       {
         title: "Download",
-        body: "Get the full project, or just the tasks, as a ready-to-run ZIP.",
+        body: "Get the full project as a ready-to-run ZIP.",
       },
     ] as [HowStep, HowStep, HowStep],
     trustBrowser: "Runs in your browser, nothing uploaded",
@@ -151,7 +151,6 @@ export const en = {
     selectAll: "Select all",
     clearAll: "Clear all",
     needsSage: "needs SageMath",
-    buildOwnEyebrow: "Custom",
     buildOwnTitle: "Build your own task",
     buildOwnDesc: "Write your own data recipe, or have an AI write it for you.",
     includeCustom: "Include in project",
@@ -165,16 +164,13 @@ export const en = {
     nameReserved: (folder: string) =>
       `“${folder}” clashes with a name that Python, an installed package, the generated scripts or the operating system already use, so it can't be a task folder. Choose another name.`,
     nameTooLong: "The folder name would be over 40 characters. Choose a shorter name.",
-    nameFallback: "This name has no letters or numbers to use, so the task folder will be named “my_task”.",
+    nameFallback: "This name has no a–z letters or digits, so the task folder will be named “my_task”.",
     nameFallbackEmpty: "Without a name, the task folder will be named “my_task”.",
     customNameAlert: (message: string) => `Your own task: ${message}`,
-    measurements: "What to measure (optional)",
     measurementsHint: "Statistics computed about your custom task's data.",
-    tokenizer: "Tokenizer / vocabulary (optional)",
-    optionsLabel: "Options",
     tabGenerator: "Generator",
     tabTokenizer: "Tokenizer",
-    tabMeasure: "Measurements",
+    tabMeasure: "Stats",
     sectionTabs: "Custom task sections",
     items: taskItems as Record<string, TaskItemText>,
     templates: templateTexts as Record<TemplateId, TemplateText>,
@@ -189,6 +185,8 @@ export const en = {
     editsLexer: "This becomes experiments/toy/configs/lexer.yaml. Edit it there later if your generator changes.",
     tabWrite: "Write code",
     tabAi: "Ask an AI to write it",
+    /** Accessible name of the Write code / Ask an AI toggle. */
+    modeLabel: "How to write the code",
     aiIntro:
       "Don't want to write code? Describe your idea, copy the prompt, and paste it into any AI assistant (ChatGPT, Claude, Gemini). Then paste its reply into the “Write code” tab.",
     aiDescLabel: "Describe your task: input, output, and assumptions",
@@ -218,15 +216,13 @@ export const en = {
     saved: "Saved. See “How to use it” below.",
     downloadBlocked: "Your own task's name can't be used. Go back to Step 1 and rename it.",
     downloadFailed: "The download could not be created. Reload the page and try again.",
-    settings: "Custom task settings",
-    optional: "optional",
-    examplesQ: "Training sample size",
-    examplesInfoTitle: "Number of examples",
+    examplesQ: "Number of training examples",
+    examplesInfoTitle: "Number of training examples",
     examplesInfo:
       "More examples usually help the model learn better, but take longer to prepare and train. “Balanced” is a good default; use “Quick” to test the pipeline faster, or “Thorough” for the best results.",
     sizeQuick: "Quick",
     sizeBalanced: "Balanced",
-    sizeThorough: "Intense",
+    sizeThorough: "Thorough",
     brainQ: "Model size",
     brainInfoTitle: "Model size",
     brainInfo:
@@ -256,7 +252,7 @@ export const en = {
     arch: "Model architecture",
     archInfoTitle: "Model architecture",
     archInfo:
-      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the HuggingFace variant. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead and runs one causal stack over the problem followed by its solution. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot; it needs expanded-form data.",
+      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the Hugging Face implementation. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead: it reads the problem and writes the solution as one continuous sequence. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot; it needs expanded-form data.",
     archStandard: "Standard",
     archBart: "BART",
     archEncoderOnly: "Encoder only",
@@ -265,21 +261,21 @@ export const en = {
     archNoteGeneric:
       "The default encoder-decoder. Works for any sequence-to-sequence task.",
     archNoteBart:
-      "HuggingFace BART. Same task shape as Standard, different implementation.",
+      "Hugging Face BART. Same task shape as Standard, different implementation.",
     archNoteEncoderClassifier:
       "No decoder: predicts one token. Use it when the target is a single label.",
     archNoteDecoderOnly:
-      "One causal stack over problem and solution. The usual choice for arithmetic tasks.",
+      "Reads the problem, then writes the solution as one continuous sequence, one token at a time.",
     archNoteMonomial:
       "One position per monomial. Much shorter polynomial sequences; needs expanded-form data.",
     rounds: "Training rounds",
     roundsInfoTitle: "Training rounds",
     roundsInfo:
-      "How many times the model reviews all the examples while learning. More rounds can improve accuracy up to a point.",
+      "How many times the model goes through all the training examples (each pass is called an epoch). More rounds can improve accuracy up to a point.",
     logging: "Progress logging",
     loggingInfoTitle: "Weights & Biases",
     loggingInfo:
-      "An optional online dashboard for tracking training (Weights & Biases). If you turn it on, it's added to your install. You'll just need a free account and to run “wandb login” once. Leave it off otherwise.",
+      "An optional online dashboard for following training as it runs (Weights & Biases). It is already installed with CALT; to use it, you need a free account and to run “wandb login” once. Leave it off if you don't need it.",
     on: "On",
     off: "Off",
     treeTitle: "What's inside",
@@ -288,10 +284,10 @@ export const en = {
     howToUse: "How to use it",
     prereq: "You'll need conda and a terminal. Just copy-paste the commands below.",
     howUnzipProject: (proj: string) => `Unzip ${proj}.zip (a complete CALT project).`,
-    howInstall: "Install everything once with conda (full details in README.md).",
+    howInstall: "Install everything once with conda (commands under “One-time setup commands” below; full details in README.md).",
     howRun: "Then open a terminal and, for each task, run:",
     setupLabel: "One-time setup commands",
-    sTasks: "Tasks",
+    taskCount: (n: number) => (n === 1 ? "1 task" : `${n} tasks`),
     back: "Back",
   },
   lexer: {
@@ -326,11 +322,10 @@ export const en = {
     title: "Settings",
     subtitle: "Fine-tune each task's training settings. The defaults already work well.",
     appliesNote:
-      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of examples, train.yaml for the model size, training rounds, position embedding and logging, and lexer.yaml for the tokenizer vocabulary.",
+      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of training examples, train.yaml for the model size, architecture, training rounds, position embedding and logging, and lexer.yaml for the tokenizer vocabulary.",
     noTasks: "No tasks selected yet. Go back and pick at least one.",
     continueLabel: "Continue",
     previewLegend: "This is what your settings write into the task's config files. Highlighted lines are the ones the controls edit; a line flashes when it changes.",
-    previewLexer: "Tokenizer vocabulary",
     previewFiles: "Config file",
   },
   details: {
@@ -340,7 +335,7 @@ export const en = {
     tasks:
       "A CALT task frames a math problem as a translation: an input string (the problem) maps to an output string (the answer). You define one instance generator that returns (problem, answer) pairs from a seed; the example cards are ready-made generators you can add as they are.",
     settings:
-      "These controls set the dataset size, the Transformer model size, how many training rounds run, and how token positions are encoded. Each one is written into the task's data.yaml / train.yaml, shown live on the right.",
+      "These controls set the dataset size, the model size and architecture, how token positions are encoded, how many training rounds run, and whether training is logged online. Each one is written into the task's data.yaml / train.yaml and shown live in the preview.",
     finish:
       "Your download is a complete, runnable CALT project: one folder per task (generator, configs, scripts), shared utilities, a pinned pyproject.toml and a README. The workflow is generate → train → evaluate.",
   },
@@ -350,7 +345,6 @@ export const en = {
   a11y: {
     decrease: "Decrease",
     increase: "Increase",
-    remove: "Remove",
     whatsThis: "What's this?",
     settingsTabs: "Settings for each task",
     skipToContent: "Skip to content",
