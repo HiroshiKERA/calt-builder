@@ -5,7 +5,11 @@
 // src/generated/projectFiles.ts (the shipped pyproject.toml and the Engine line
 // of CALT_SNAPSHOT.txt). zip.ts rewrites only the pin at download time, so a
 // forgotten edit or re-bundle would otherwise ship a self-contradicting
-// project (e.g. a new pin next to an old requires-python). Run by `npm run build`.
+// project (e.g. a new pin next to the old requires-python of a stale bundle).
+// It checks that project-files/pyproject.toml pins CALT_VERSION, that the
+// bundled pyproject.toml is identical to it, and that CALT_SNAPSHOT.txt names
+// the same version. It does not decide what requires-python should be.
+// Run by `npm run build`.
 
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -39,8 +43,10 @@ if (!common) fail("could not read COMMON_FILES from src/generated/projectFiles.t
 
 if (common["pyproject.toml"] !== sitePyproject)
   problems.push("the bundled pyproject.toml differs from project-files/pyproject.toml");
-const engine = (common["CALT_SNAPSHOT.txt"] || "").match(/^Engine\s*:\s*(.*)$/m)?.[1]?.trim();
-if (engine !== want) problems.push(`CALT_SNAPSHOT.txt says "Engine : ${engine}", expected "${want}"`);
+const engine = (common["CALT_SNAPSHOT.txt"] || "").match(/^Engine\s*:\s*(.*)$/m)?.[1]?.trim() ?? "";
+const enginePins = pinsIn(engine);
+if (enginePins.length !== 1 || enginePins[0] !== version)
+  problems.push(`CALT_SNAPSHOT.txt says "Engine : ${engine}", expected "${want}"`);
 
 if (problems.length) {
   fail(

@@ -74,21 +74,36 @@ function applySettings(path: string, content: string, s: ProjectSettings): strin
 /**
  * Matches a whole `calt-x==<version>` specifier, extras included
  * (`calt-x[kaggle]==1.6.0.post1`), but not a longer name such as `mycalt-x`.
+ * The character before the name is captured in group 1 rather than checked
+ * with a lookbehind: this runs in the browser, and Safari before 16.4 rejects
+ * lookbehind, which would throw while the entry chunk loads and blank the site.
  */
-const CALT_PIN_RE = /(?<![\w.-])calt-x(\[[^\]]*\])?\s*==\s*[^\s"',;]+/g;
+const CALT_PIN_RE = /(^|[^\w.-])calt-x(\[[^\]]*\])?\s*==\s*[^\s"',;]+/g;
 
 /**
  * Rewrite the calt-x pin in the shared pyproject.toml to CALT_REQUIREMENT.
  * pyproject.toml is a shared file, so this runs on COMMON_FILES rather than
- * inside applySettings (which only sees task files). It only touches the pin:
- * `npm run build` runs scripts/check-bundle.mjs, which fails when the bundle
- * (pin, requires-python, CALT_SNAPSHOT.txt) is out of step with caltVersion.ts.
+ * inside applySettings (which only sees task files). Only the pin outside
+ * comments is touched; everything else in the file comes from the bundle, which
+ * scripts/check-bundle.mjs (run by `npm run build`) keeps identical to
+ * project-files/pyproject.toml and in step with caltVersion.ts.
  */
 function withCurrentPin(path: string, content: string): string {
   if (path !== "pyproject.toml") return content;
-  return content.replace(CALT_PIN_RE, (_m, extras: string | undefined) =>
-    CALT_REQUIREMENT.replace("calt-x", `calt-x${extras ?? ""}`),
-  );
+  return content
+    .split("\n")
+    .map((line) => {
+      const hash = line.indexOf("#");
+      const code = hash === -1 ? line : line.slice(0, hash);
+      const comment = hash === -1 ? "" : line.slice(hash);
+      const pinned = code.replace(
+        CALT_PIN_RE,
+        (_m, before: string, extras: string | undefined) =>
+          before + CALT_REQUIREMENT.replace("calt-x", `calt-x${extras ?? ""}`),
+      );
+      return pinned + comment;
+    })
+    .join("\n");
 }
 
 /** Build the full set of files (path -> content) the ZIP will contain. */

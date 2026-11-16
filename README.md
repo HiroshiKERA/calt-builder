@@ -42,7 +42,8 @@ and is the first release that trains on transformers 5.15 or later, which a fres
 > **Downloaded a project before this fix?** Projects pinned to `calt-x==1.5.0`
 > stop at training start with `AttributeError: 'TrainingArguments' object has no
 > attribute 'warmup_ratio'` on a fresh install. Run `pip install calt-x==1.6.0`
-> inside `calt-env`; no project files need to change.
+> inside `calt-env`. If you install from the project's `pyproject.toml` (e.g. with
+> uv), also change its `calt-x==1.5.0` line to `calt-x==1.6.0`.
 
 ## Run locally
 
@@ -78,7 +79,7 @@ Then review the diff in `src/generated/projectFiles.ts`, test a task, and commit
 (Optional, while a source repo still exists: `CALT_REPO_URL=<url> npm run sync:tasks`
 re-vendors `task-sources/` from that remote, then bundles.)
 
-The engine version is defined once, in `src/lib/caltVersion.ts` (currently
+The engine version is defined in `src/lib/caltVersion.ts` (currently
 `calt-x==1.6.0` from PyPI). See **[MAINTAINING.md](MAINTAINING.md)** for how to bump it.
 
 See [MAINTAINING.md](MAINTAINING.md) for the full maintenance workflow and
