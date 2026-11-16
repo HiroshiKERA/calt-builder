@@ -63,6 +63,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
         </div>
         <Segmented
           ariaLabel="dataset size"
+          layoutKey="dataset size"
           value={activeSize}
           onChange={(v) => {
             const p = SIZE_PRESETS.find((x) => x.value === v)!;
@@ -79,6 +80,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
         </div>
         <Segmented
           ariaLabel="model size"
+          layoutKey="model size"
           value={settings.modelPreset}
           onChange={(v) => onChange({ modelPreset: v as ModelPreset })}
           options={[
@@ -97,6 +99,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
         </div>
         <Segmented
           ariaLabel="position embedding"
+          layoutKey="position embedding"
           value={settings.posEmbedding}
           onChange={(v) => onChange({ posEmbedding: v as PosEmbedding })}
           options={[
@@ -116,6 +119,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
         </div>
         <Segmented
           ariaLabel="model architecture"
+          layoutKey="model architecture"
           value={settings.modelType}
           onChange={(v) => onChange({ modelType: v as ModelType })}
           options={[
@@ -187,7 +191,7 @@ export function StepSettings() {
       id,
       label: items[id]?.name ?? id,
     })),
-    ...(config.custom.enabled ? [{ id: "__custom", label: config.custom.name || "My task" }] : []),
+    ...(config.custom.enabled ? [{ id: "__custom", label: config.custom.name || t.tasks.customTabFallback }] : []),
   ];
 
   const [activeTab, setActiveTab] = useState<string>(tabs[0]?.id ?? "");

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useWizard } from "./state/store";
+import { useT } from "./i18n";
 import { TopBar } from "./components/layout/TopBar";
 import { BuilderShell } from "./components/layout/BuilderShell";
 import { StepWelcome } from "./components/steps/StepWelcome";
@@ -21,6 +22,7 @@ const variants = {
 const transition = { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const };
 
 export default function App() {
+  const t = useT();
   const { step } = useWizard();
   const Step = BUILDER[step] ?? StepTasks;
 
@@ -30,7 +32,7 @@ export default function App() {
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
       >
-        Skip to content
+        {t.a11y.skipToContent}
       </a>
       <TopBar />
       <main id="main">

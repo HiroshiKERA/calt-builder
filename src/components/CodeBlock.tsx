@@ -6,6 +6,7 @@ import "prismjs/components/prism-bash";
 import "prismjs/components/prism-markdown";
 import { Check, Copy } from "lucide-react";
 import { cn } from "../lib/utils";
+import { useT } from "../i18n";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -24,6 +25,7 @@ export function CodeBlock({
   maxHeight?: string;
   className?: string;
 }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const lang = language === "shell" ? "bash" : language;
 
@@ -68,7 +70,7 @@ export function CodeBlock({
           className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-ink-500 transition hover:bg-ink-100 hover:text-brand-600"
         >
           {copied ? <Check size={13} /> : <Copy size={13} />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? t.code.copied : t.code.copy}
         </button>
       </div>
       <pre className="scroll-thin m-0 overflow-auto p-4" style={{ maxHeight }}>

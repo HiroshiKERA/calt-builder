@@ -1,3 +1,100 @@
+import type { AllowedTaskId } from "../lib/tasks";
+import type { TemplateId } from "../lib/templates";
+
+// The keyed maps below are declared on their own so their key sets stay precise:
+// ja.ts checks its copies with `satisfies Record<…Key, …>`, so a missing or
+// extra key is a compile error. Inside `en` they are widened to string-indexed
+// records, which is what the components look them up with.
+
+export interface TaskItemText {
+  name: string;
+  summary: string;
+  /** Short "input → output" hint shown under the name, in monospace. */
+  tagline: string;
+}
+const taskItems = {
+  parity: {
+    name: "Permutation parity",
+    summary: "Decide whether a shuffled list needs an even or odd number of swaps to sort.",
+    tagline: "2 0 1  →  +1 / -1",
+  },
+  groebner_basis: {
+    name: "Gröbner basis",
+    summary: "Compute the Gröbner basis of a pair of polynomials.",
+    tagline: "f1 | f2  →  Gröbner basis",
+  },
+  integer_factorization: {
+    name: "Prime factor listing",
+    summary: "List the prime factors of a given integer.",
+    tagline: "2310  →  2 | 3 | 5 | 7 | 11",
+  },
+  gf17_addition: {
+    name: "Modular running sums",
+    summary: "Add up a list of numbers step by step, wrapping around at 17 (finite-field arithmetic).",
+    tagline: "5,9,3,4  →  5,14,0,4",
+  },
+  eigvec_3x3: {
+    name: "Dominant eigenvector",
+    summary: "Find the main direction (top eigenvector) of a 3×3 symmetric matrix, on real-valued data.",
+    tagline: "3×3 matrix  →  eigenvector",
+  },
+  polynomial_addition: {
+    name: "Polynomial addition",
+    summary: "Add a sequence of polynomials step by step (cumulative sums).",
+    tagline: "p1 | p2 | …  →  p1 | p1+p2 | …",
+  },
+} satisfies Record<AllowedTaskId, TaskItemText>;
+export type TaskItemId = keyof typeof taskItems;
+
+export interface TemplateText {
+  /** Chip label. The task name a template seeds stays ASCII (templates.ts `name`). */
+  name: string;
+  /** One plain line for non-technical users (no jargon). */
+  summary: string;
+}
+const templateTexts = {
+  custom: { name: "Start from scratch", summary: "Define your own problem-and-answer rule from scratch." },
+  gcd: {
+    name: "Greatest common divisor",
+    summary: "Given two whole numbers, find the largest number that divides both.",
+  },
+  integer_factorization: {
+    name: "Prime factorization",
+    summary: "Break a number down into the prime numbers that multiply to make it.",
+  },
+  pca: {
+    name: "Principal component",
+    summary: "From a small cloud of 2-D points, find the main direction they spread along.",
+  },
+} satisfies Record<TemplateId, TemplateText>;
+
+const treeNotes = {
+  core: "the task logic (generator, metrics)",
+  configs: "customized at Step 2",
+  scripts: "run these: generate, train, evaluate",
+  shared: "utilities shared by every task",
+};
+export type TreeNoteKey = keyof typeof treeNotes;
+
+export interface StatText {
+  label: string;
+  desc: string;
+}
+const statTexts = {
+  input_length: { label: "Problem length", desc: "How many pieces each problem is made of." },
+  output_length: { label: "Answer length", desc: "How many pieces each answer is made of." },
+  input_chars: { label: "Problem size", desc: "How many characters long each problem is." },
+  output_chars: { label: "Answer size", desc: "How many characters long each answer is." },
+  max_abs_value: { label: "Biggest number", desc: "The largest number that appears in each problem." },
+  num_elements: { label: "Number of parts", desc: "How many parts the problem is split into (by the “|” symbol)." },
+};
+export type StatKey = keyof typeof statTexts;
+
+export interface HowStep {
+  title: string;
+  body: string;
+}
+
 export const en = {
   nav: {
     brand: "CALT",
@@ -38,7 +135,7 @@ export const en = {
         title: "Download",
         body: "Get the full project, or just the tasks, as a ready-to-run ZIP.",
       },
-    ],
+    ] as [HowStep, HowStep, HowStep],
     trustBrowser: "Runs in your browser, nothing uploaded",
     trustSetup: "No technical setup to use the builder",
     trustOpen: "Built on the open-source CALT library",
@@ -79,36 +176,11 @@ export const en = {
     tabTokenizer: "Tokenizer",
     tabMeasure: "Measurements",
     sectionTabs: "Custom task sections",
-    items: {
-      parity: {
-        name: "Permutation parity",
-        summary: "Decide whether a shuffled list needs an even or odd number of swaps to sort.",
-      },
-      groebner_basis: {
-        name: "Gröbner basis",
-        summary: "Compute the Gröbner basis of a pair of polynomials.",
-      },
-      border_basis: {
-        name: "Border basis",
-        summary: "Compute the border basis of a zero-dimensional polynomial ideal.",
-      },
-      integer_factorization: {
-        name: "Prime factor listing",
-        summary: "List the prime factors of a given integer.",
-      },
-      gf17_addition: {
-        name: "Modular running sums",
-        summary: "Add up a list of numbers step by step, wrapping around at 17 (finite-field arithmetic).",
-      },
-      eigvec_3x3: {
-        name: "Dominant eigenvector",
-        summary: "Find the main direction (top eigenvector) of a 3×3 symmetric matrix, on real-valued data.",
-      },
-      polynomial_addition: {
-        name: "Polynomial addition",
-        summary: "Add a sequence of polynomials step by step (cumulative sums).",
-      },
-    } as Record<string, { name: string; summary: string }>,
+    items: taskItems as Record<string, TaskItemText>,
+    templates: templateTexts as Record<TemplateId, TemplateText>,
+    needsDeps: (deps: string) => `needs ${deps}`,
+    /** Settings tab label for a custom task whose name is empty. */
+    customTabFallback: "My task",
   },
   data: {
     recipeNote: "Keep a class with __call__(self, seed) that returns a (problem, answer) pair of text.",
@@ -212,12 +284,7 @@ export const en = {
     off: "Off",
     treeTitle: "What's inside",
     treeBody: "The files in your download. Edit any of them later for local tweaks.",
-    treeNotes: {
-      core: "the task logic (generator, metrics)",
-      configs: "customized at Step 2",
-      scripts: "run these: generate, train, evaluate",
-      shared: "utilities shared by every task",
-    } as Record<string, string>,
+    treeNotes: treeNotes as Record<string, string>,
     howToUse: "How to use it",
     prereq: "You'll need conda and a terminal. Just copy-paste the commands below.",
     howUnzipProject: (proj: string) => `Unzip ${proj}.zip (a complete CALT project).`,
@@ -286,15 +353,19 @@ export const en = {
     remove: "Remove",
     whatsThis: "What's this?",
     settingsTabs: "Settings for each task",
+    skipToContent: "Skip to content",
   },
-  stats: {
-    input_length: { label: "Problem length", desc: "How many pieces each problem is made of." },
-    output_length: { label: "Answer length", desc: "How many pieces each answer is made of." },
-    input_chars: { label: "Problem size", desc: "How many characters long each problem is." },
-    output_chars: { label: "Answer size", desc: "How many characters long each answer is." },
-    max_abs_value: { label: "Biggest number", desc: "The largest number that appears in each problem." },
-    num_elements: { label: "Number of parts", desc: "How many parts the problem is split into (by the “|” symbol)." },
-  } as Record<string, { label: string; desc: string }>,
+  code: {
+    copy: "Copy",
+    copied: "Copied",
+  },
+  /** Shown by ErrorBoundary, which renders outside the language provider. */
+  errorBoundary: {
+    title: "Something went wrong",
+    body: "The builder hit an unexpected error. Your downloaded projects are unaffected. Reloading the page usually fixes it.",
+    reload: "Reload",
+  },
+  stats: statTexts as Record<string, StatText>,
 };
 
 export type Dict = typeof en;

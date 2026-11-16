@@ -65,7 +65,7 @@ site/
 │   │   ├── ErrorBoundary.tsx   Friendly recovery screen instead of a blank page
 │   │   ├── CodeBlock.tsx / Icon.tsx
 │   ├── lib/
-│   │   ├── tasks.ts         Ready-made task registry (ALLOWED_TASKS filter + display metadata)
+│   │   ├── tasks.ts         Ready-made task registry (ALLOWED_TASK_IDS filter + icon/SageMath metadata)
 │   │   ├── codegen.ts       Custom-task file generation; LexerConfig + PosEmbedding types
 │   │   ├── zip.ts           File map + ZIP (lazy JSZip); applySettings patches task configs
 │   │   ├── templates.ts     Build-your-own starter templates (custom/gcd/integer_factorization/pca)
@@ -107,12 +107,12 @@ returns to step 0 **without** clearing; "Start over" resets (with a confirm).
 
 ## 5. Ready-made tasks (`src/lib/tasks.ts`) — the 6 example cards
 
-`BUNDLED_TASKS` comes from the snapshot. `ALLOWED_TASKS` whitelists the **six** shown:
+`BUNDLED_TASKS` comes from the snapshot. `ALLOWED_TASK_IDS` whitelists the **six** shown:
 `parity, groebner_basis, integer_factorization, gf17_addition, eigvec_3x3,
 polynomial_addition`. `border_basis` is intentionally **dropped** (close to Gröbner,
 less popular — professor's request). The four arithmetic/matrix/poly tasks are
-adaptations of the official calt-codebase `examples/`. `META` holds icon/tagline/
-needsSage; names+summaries come from i18n (`tasks.items[id]`).
+adaptations of the official calt-codebase `examples/`. `META` holds icon/
+needsSage; names, summaries and taglines come from i18n (`tasks.items[id]`).
 
 ## 6. Download pipeline (`src/lib/zip.ts`) + live preview
 
@@ -159,7 +159,14 @@ Weights & Biases logging toggle. The ConfigPreview sits beside these.
 - `aiPrompt.ts`: `buildAiPrompt` (generator) requires the user to state INPUT/OUTPUT
   and assumptions (ranges) and exposes them as `__init__` args → data.yaml.
 - i18n: `Dict = typeof en`; `ja.ts` must stay key-for-key in sync (missing key =
-  compile error). UI strings via `useT()`; generated Python stays English.
+  compile error). The keyed maps (`tasks.items`, `tasks.templates`,
+  `review.treeNotes`, `stats`) are declared at the top of `en.ts` and checked in
+  `ja.ts` with `satisfies`, so a missing or extra id fails too; `tasks.items` is
+  also checked against `ALLOWED_TASK_IDS`. UI strings via `useT()`;
+  `ErrorBoundary` (outside the provider) picks en/ja from `<html lang>`.
+  Anything written into the ZIP (generated code, README, template `name` /
+  `description`, `MEASURE_SEED`) and the AI prompt stay English. Each
+  `Segmented` takes a fixed, untranslated `layoutKey` for its highlight.
 - Theme: CSS-variable tokens in `index.css` (`:root` / `.dark`); `theme-init.js`
   sets the class before paint.
 
@@ -213,10 +220,13 @@ npm run build
 ## 12. How to extend
 
 - **New ready-made task:** add it under `task-sources/` (needs `core/generator.py`
-  + toy `configs/{data,train,lexer}.yaml`), re-bundle, then add the id to `ALLOWED_TASKS` +
+  + toy `configs/{data,train,lexer}.yaml`), re-bundle, then add the id to `ALLOWED_TASK_IDS` +
   `META` in `tasks.ts` and to `tasks.items` in `en.ts`/`ja.ts`.
-- **New build-your-own template:** add it in `templates.ts` (the picker shows it).
-- **New preset measurement:** add a `StatDef` in `stats.ts`.
+- **New build-your-own template:** add its id to `TEMPLATE_IDS` and the entry in
+  `templates.ts`, then its chip label and summary to `tasks.templates` in `en.ts`
+  and `ja.ts`.
+- **New preset measurement:** add a `StatDef` in `stats.ts` and its text to
+  `stats` in `en.ts` and `ja.ts`.
 - **New UI string:** add to `en.ts` AND `ja.ts` (both, or it won't compile).
 
 ## 13. Non-obvious rules (do not trip on these)

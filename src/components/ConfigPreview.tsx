@@ -110,6 +110,7 @@ export function ConfigPreview({
       <p className="text-xs leading-relaxed text-ink-400">{t.settings.previewLegend}</p>
       <Segmented
         ariaLabel={t.settings.previewFiles}
+        layoutKey="Config file"
         value={tab}
         onChange={(v) => setTab(v as FileKey)}
         options={tabs.map((k) => ({ value: k, label: FILE_LABEL[k] }))}

@@ -34,14 +34,21 @@ export interface LexerSuggestion {
 
 export type ParamValues = Record<string, number | string>;
 
+/** Template ids. The chip label and one-line summary for each live in i18n (tasks.templates). */
+export const TEMPLATE_IDS = ["custom", "gcd", "integer_factorization", "pca"] as const;
+export type TemplateId = (typeof TEMPLATE_IDS)[number];
+
 export interface Template {
-  id: string;
+  id: TemplateId;
+  /**
+   * Default task name when this template is picked (stays ASCII: it becomes the
+   * folder and class name). Not shown as the chip label, which comes from i18n.
+   * The "custom" template's name is only used to recognise an untouched name.
+   */
   name: string;
   /** lucide-react icon name */
   icon: string;
-  tagline: string;
-  /** One plain-English line for non-technical users (no jargon). */
-  beginnerSummary: string;
+  /** Written into the generated task README, so it stays English. */
   description: string;
   exampleInput: string;
   exampleOutput: string;
@@ -84,8 +91,6 @@ export const TEMPLATES: Template[] = [
     id: "custom",
     name: "Start from scratch",
     icon: "Pencil",
-    tagline: "write your own rule",
-    beginnerSummary: "Define your own problem-and-answer rule from scratch.",
     description:
       "A blank, working skeleton you fill in. Best if your task does not match the presets: you write the generator logic in the editor on the next step.",
     exampleInput: "1 2 3",
@@ -129,8 +134,6 @@ class ${cls}:
     id: "gcd",
     name: "Greatest common divisor",
     icon: "Divide",
-    tagline: "a b  →  gcd(a, b)",
-    beginnerSummary: "Given two whole numbers, find the largest number that divides both.",
     description:
       "A simple arithmetic warm-up: the model reads two integers and outputs their greatest common divisor.",
     exampleInput: "48 36",
@@ -170,8 +173,6 @@ class ${cls}:
     // with the ready-made integer_factorization task (see src/lib/names.ts).
     name: "Prime factorization",
     icon: "Binary",
-    tagline: "60  →  2^2 * 3 * 5",
-    beginnerSummary: "Break a number down into the prime numbers that multiply to make it.",
     description:
       "An arithmetic task: the model reads an integer and outputs its prime factorization. Uses pure-Python trial division, so no extra packages are needed.",
     exampleInput: "60",
@@ -225,8 +226,6 @@ class ${cls}:
     id: "pca",
     name: "Principal component",
     icon: "ScatterChart",
-    tagline: "points  →  top component",
-    beginnerSummary: "From a small cloud of 2-D points, find the main direction they spread along.",
     description:
       "A matrix / linear-algebra task on real-valued, finite-precision data: the model reads a set of 2-D points and outputs the unit vector of their first principal component (rounded).",
     exampleInput: "1.2 0.5 | -0.3 2.1 | 0.8 -1.4",

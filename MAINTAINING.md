@@ -69,9 +69,10 @@ patches `experiments/toy/configs/{data,train}.yaml` by key name
 1. Create the task folder under **`task-sources/`** (needs `core/generator.py`
    returning `(str, str)`, `core/train.py`, and toy `configs/{data,train,lexer}.yaml`).
 2. Re-bundle (above): `npm run bundle`.
-3. In `src/lib/tasks.ts` add the id to `ALLOWED_TASKS` and an entry in `META`
-   (icon, tagline, `needsSage`).
-4. Add `tasks.items[id]` (name + summary) to **both** `src/i18n/en.ts` and `ja.ts`.
+3. In `src/lib/tasks.ts` add the id to `ALLOWED_TASK_IDS` and an entry in `META`
+   (icon, `needsSage`).
+4. Add `tasks.items[id]` (name, summary, tagline) to **both** `src/i18n/en.ts` and
+   `ja.ts`; a missing entry in either is a compile error.
 
 ## Bumping the calt-x version
 

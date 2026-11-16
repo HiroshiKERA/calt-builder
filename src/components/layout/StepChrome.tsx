@@ -32,13 +32,13 @@ export function StepHeader({
 
 export function StepFooter({
   onContinue,
-  continueLabel = "Continue",
+  continueLabel,
   continueDisabled,
   hideBack,
   children,
 }: {
   onContinue?: () => void;
-  continueLabel?: string;
+  continueLabel: string;
   continueDisabled?: boolean;
   hideBack?: boolean;
   children?: ReactNode;

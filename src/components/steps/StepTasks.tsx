@@ -195,6 +195,7 @@ function Measurements() {
         <div className="space-y-4 border-t border-ink-100 p-3">
           <Segmented
             ariaLabel="measure-mode"
+          layoutKey="measure-mode"
             value={mode}
             onChange={(v) => setMode(v)}
             options={[
@@ -307,6 +308,7 @@ function LexerEditor() {
         </div>
         <Segmented
           ariaLabel="digit-group"
+          layoutKey="digit-group"
           value={String(lx.digitGroup)}
           onChange={(v) => set({ digitGroup: toInt(v, lx.digitGroup) })}
           options={[
@@ -426,15 +428,15 @@ function CustomBuilder() {
                   )}
                 >
                   <Icon name={tpl.icon} size={14} className="flex-shrink-0" />
-                  {tpl.name}
+                  {t.tasks.templates[tpl.id].name}
                 </button>
               );
             })}
           </div>
           <p className="mt-2.5 text-xs leading-snug text-ink-500">
-            {activeTpl.beginnerSummary}
+            {t.tasks.templates[activeTpl.id].summary}
             {activeTpl.extraDeps?.length ? (
-              <span className="text-amber-600"> · needs {activeTpl.extraDeps.join(", ")}</span>
+              <span className="text-amber-600"> · {t.tasks.needsDeps(activeTpl.extraDeps.join(", "))}</span>
             ) : activeTpl.requiresSage ? (
               <span className="text-amber-600"> · {t.tasks.needsSage}</span>
             ) : null}
@@ -470,6 +472,7 @@ function CustomBuilder() {
       <div className="space-y-3">
         <Segmented
           ariaLabel={t.tasks.sectionTabs}
+          layoutKey="Custom task sections"
           value={section}
           onChange={(v) => setSection(v as CustomSection)}
           options={[
@@ -483,6 +486,7 @@ function CustomBuilder() {
           <div className="space-y-3">
             <Segmented
               ariaLabel="recipe-mode"
+          layoutKey="recipe-mode"
               value={mode}
               onChange={(v) => setMode(v)}
               options={[
@@ -622,7 +626,7 @@ export function StepTasks() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {TASKS.map((task) => {
           const active = config.selectedTasks.includes(task.id);
-          const meta = items[task.id] ?? { name: task.id, summary: "" };
+          const meta = items[task.id] ?? { name: task.id, summary: "", tagline: "" };
           return (
             <button
               key={task.id}
@@ -653,7 +657,7 @@ export function StepTasks() {
                 </span>
                 <div className="min-w-0 pr-5">
                   <div className="text-[15px] font-bold text-ink-900">{meta.name}</div>
-                  <div className="truncate font-mono text-xs text-ink-400">{task.tagline}</div>
+                  <div className="truncate font-mono text-xs text-ink-400">{meta.tagline}</div>
                 </div>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-ink-500">{meta.summary}</p>

@@ -1,4 +1,5 @@
-import type { Dict } from "./en";
+import type { Dict, StatKey, StatText, TaskItemId, TaskItemText, TemplateText, TreeNoteKey } from "./en";
+import type { TemplateId } from "../lib/templates";
 
 export const ja: Dict = {
   nav: {
@@ -75,14 +76,42 @@ export const ja: Dict = {
       parity: {
         name: "置換の符号",
         summary: "シャッフルされたリストを並べ替えるのに必要な入れ替えが偶数回か奇数回かを判定します。",
+        tagline: "2 0 1  →  +1 / -1",
       },
-      groebner_basis: { name: "グレブナー基底", summary: "2つの多項式のグレブナー基底を計算します。" },
-      border_basis: { name: "ボーダー基底", summary: "0次元の多項式イデアルのボーダー基底を計算します。" },
-      integer_factorization: { name: "素因数の列挙", summary: "与えられた整数の素因数を列挙します。" },
-      gf17_addition: { name: "剰余の累積和", summary: "数のリストを順に足し、17で折り返します（有限体の算術）。" },
-      eigvec_3x3: { name: "主固有ベクトル", summary: "3×3対称行列の主方向（最大固有ベクトル）を求めます。実数値データ。" },
-      polynomial_addition: { name: "多項式の加算", summary: "多項式の列を1つずつ足し合わせ、累積和を求めます。" },
-    },
+      groebner_basis: {
+        name: "グレブナー基底",
+        summary: "2つの多項式のグレブナー基底を計算します。",
+        tagline: "f1 | f2  →  グレブナー基底",
+      },
+      integer_factorization: {
+        name: "素因数の列挙",
+        summary: "与えられた整数の素因数を列挙します。",
+        tagline: "2310  →  2 | 3 | 5 | 7 | 11",
+      },
+      gf17_addition: {
+        name: "剰余の累積和",
+        summary: "数のリストを順に足し、17で折り返します（有限体の算術）。",
+        tagline: "5,9,3,4  →  5,14,0,4",
+      },
+      eigvec_3x3: {
+        name: "主固有ベクトル",
+        summary: "3×3対称行列の主方向（最大固有ベクトル）を求めます。実数値データ。",
+        tagline: "3×3行列  →  固有ベクトル",
+      },
+      polynomial_addition: {
+        name: "多項式の加算",
+        summary: "多項式の列を1つずつ足し合わせ、累積和を求めます。",
+        tagline: "p1 | p2 | …  →  p1 | p1+p2 | …",
+      },
+    } satisfies Record<TaskItemId, TaskItemText>,
+    templates: {
+      custom: { name: "ゼロから作る", summary: "問題と答えのルールを一から自分で定義します。" },
+      gcd: { name: "最大公約数", summary: "2つの整数から、両方を割り切る最大の数を求めます。" },
+      integer_factorization: { name: "素因数分解", summary: "数を、掛け合わせるとその数になる素数に分解します。" },
+      pca: { name: "主成分", summary: "2次元の点の集まりから、最も広がっている方向を求めます。" },
+    } satisfies Record<TemplateId, TemplateText>,
+    needsDeps: (deps: string) => `${deps} が必要`,
+    customTabFallback: "自分のタスク",
   },
   data: {
     recipeNote: "(problem, answer) のテキストのペアを返す __call__(self, seed) を持つクラスにしてください。",
@@ -180,7 +209,7 @@ export const ja: Dict = {
       configs: "ステップ2で調整",
       scripts: "実行用：生成・学習・評価",
       shared: "全タスク共通のユーティリティ",
-    } as Record<string, string>,
+    } satisfies Record<TreeNoteKey, string>,
     howToUse: "使い方",
     prereq: "conda とターミナルが必要です。下のコマンドをコピー＆ペーストするだけです。",
     howUnzipProject: (proj: string) => `${proj}.zip を展開します（すぐ実行できる完全なCALTプロジェクトです）。`,
@@ -249,6 +278,16 @@ export const ja: Dict = {
     remove: "削除",
     whatsThis: "これは何？",
     settingsTabs: "タスクごとの設定",
+    skipToContent: "本文へスキップ",
+  },
+  code: {
+    copy: "コピー",
+    copied: "コピーしました",
+  },
+  errorBoundary: {
+    title: "問題が発生しました",
+    body: "予期しないエラーが発生しました。ダウンロード済みのプロジェクトには影響ありません。ページを再読み込みすると、たいてい直ります。",
+    reload: "再読み込み",
   },
   stats: {
     input_length: { label: "問題の長さ", desc: "各問題がいくつの要素でできているか。" },
@@ -257,5 +296,5 @@ export const ja: Dict = {
     output_chars: { label: "答えの文字数", desc: "各答えが何文字あるか。" },
     max_abs_value: { label: "最大の数", desc: "各問題に現れる最大の数。" },
     num_elements: { label: "パートの数", desc: "問題が「|」記号でいくつのパートに分かれているか。" },
-  },
+  } satisfies Record<StatKey, StatText>,
 };

@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { en } from "../i18n/en";
+import { ja } from "../i18n/ja";
 
 interface Props {
   children: ReactNode;
@@ -27,6 +29,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (!this.state.hasError) return this.props.children;
+    // Rendered outside the language provider, so read the language that
+    // theme-init.js / the provider put on <html> (static lang="en" otherwise).
+    const lang = document.documentElement.lang || "en";
+    const t = (lang.toLowerCase().startsWith("ja") ? ja : en).errorBoundary;
     return (
       <div
         role="alert"
@@ -39,11 +45,8 @@ export class ErrorBoundary extends Component<Props, State> {
           lineHeight: 1.6,
         }}
       >
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 800 }}>Something went wrong</h1>
-        <p style={{ color: "#6b7488", marginTop: ".5rem" }}>
-          The builder hit an unexpected error. Your downloaded projects are
-          unaffected. Reloading the page usually fixes it.
-        </p>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 800 }}>{t.title}</h1>
+        <p style={{ color: "#6b7488", marginTop: ".5rem" }}>{t.body}</p>
         <button
           onClick={() => window.location.reload()}
           style={{
@@ -57,7 +60,7 @@ export class ErrorBoundary extends Component<Props, State> {
             cursor: "pointer",
           }}
         >
-          Reload
+          {t.reload}
         </button>
       </div>
     );
