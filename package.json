@@ -6,8 +6,8 @@
   "description": "Interactive builder that scaffolds a ready-to-run CALT task as a downloadable ZIP.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "build:docs": "tsc --noEmit && vite build --outDir ../docs/builder --emptyOutDir",
+    "build": "node scripts/check-bundle.mjs && tsc --noEmit && vite build",
+    "build:docs": "node scripts/check-bundle.mjs && tsc --noEmit && vite build --outDir ../docs/builder --emptyOutDir",
     "preview": "vite preview",
     "bundle": "node scripts/bundle-tasks.mjs",
     "sync:tasks": "node scripts/sync-tasks.mjs"

@@ -35,8 +35,15 @@ Transformer models on algebraic tasks. This app is the friendly front door to it
    ZIP. A copy-paste run guide (conda install + 3 commands) is included.
 
 The downloaded project installs the engine with **conda** (SageMath) + `pip`. The
-engine `calt-x==1.3.0` (PyPI) includes the `calt.io.preprocess` the tasks need
-(merged via PR #36 and PR #38).
+engine `calt-x==1.6.0` (PyPI) includes the `calt.io.preprocess` the tasks need
+and is the first release that trains on transformers 5.15 or later, which a fresh
+`pip` install resolves.
+
+> **Downloaded a project before this fix?** Projects pinned to `calt-x==1.5.0`
+> stop at training start with `AttributeError: 'TrainingArguments' object has no
+> attribute 'warmup_ratio'` on a fresh install. Run `pip install calt-x==1.6.0`
+> inside `calt-env`. If you install from the project's `pyproject.toml` (e.g. with
+> uv), also change its `calt-x==1.5.0` line to `calt-x==1.6.0`.
 
 ## Run locally
 
@@ -72,8 +79,8 @@ Then review the diff in `src/generated/projectFiles.ts`, test a task, and commit
 (Optional, while a source repo still exists: `CALT_REPO_URL=<url> npm run sync:tasks`
 re-vendors `task-sources/` from that remote, then bundles.)
 
-The engine source lives in `project-files/pyproject.toml` (pinned `calt-x==1.3.0`
-from PyPI). See **[MAINTAINING.md](MAINTAINING.md)** for how to bump it.
+The engine version is defined in `src/lib/caltVersion.ts` (currently
+`calt-x==1.6.0` from PyPI). See **[MAINTAINING.md](MAINTAINING.md)** for how to bump it.
 
 See [MAINTAINING.md](MAINTAINING.md) for the full maintenance workflow and
 [AI_CONTEXT.md](AI_CONTEXT.md) for a deep architectural description.

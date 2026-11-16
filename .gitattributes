@@ -1,0 +1,4 @@
+# Keep text files LF in the repo and in checkouts, so a Windows clone does not
+# re-bundle everything with CRLF (see scripts/bundle-tasks.mjs).
+* text=auto eol=lf
+*.png binary

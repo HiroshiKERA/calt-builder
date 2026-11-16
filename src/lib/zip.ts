@@ -54,9 +54,6 @@ function applySettings(path: string, content: string, s: ProjectSettings): strin
   if (path.endsWith("experiments/toy/configs/data.yaml")) {
     content = setYamlInt(content, "num_train_samples", s.numTrain);
     content = setYamlInt(content, "num_test_samples", s.numTest);
-  } else if (path.endsWith("pyproject.toml")) {
-    // Keep the bundled pin in step with caltVersion.ts, whatever the snapshot holds.
-    content = content.replace(/calt-x==[0-9]+\.[0-9]+\.[0-9]+/g, CALT_REQUIREMENT);
   } else if (path.endsWith("experiments/toy/configs/train.yaml")) {
     const m = MODEL_PRESETS[s.modelPreset];
     content = setYamlInt(content, "num_encoder_layers", m.layers);
@@ -74,6 +71,41 @@ function applySettings(path: string, content: string, s: ProjectSettings): strin
   return content;
 }
 
+/**
+ * Matches a whole `calt-x==<version>` specifier, extras included
+ * (`calt-x[kaggle]==1.6.0.post1`), but not a longer name such as `mycalt-x`.
+ * The character before the name is captured in group 1 rather than checked
+ * with a lookbehind: this runs in the browser, and Safari before 16.4 rejects
+ * lookbehind, which would throw while the entry chunk loads and blank the site.
+ */
+const CALT_PIN_RE = /(^|[^\w.-])calt-x(\[[^\]]*\])?\s*==\s*[^\s"',;]+/g;
+
+/**
+ * Rewrite the calt-x pin in the shared pyproject.toml to CALT_REQUIREMENT.
+ * pyproject.toml is a shared file, so this runs on COMMON_FILES rather than
+ * inside applySettings (which only sees task files). Only the pin outside
+ * comments is touched; everything else in the file comes from the bundle, which
+ * scripts/check-bundle.mjs (run by `npm run build`) keeps identical to
+ * project-files/pyproject.toml and in step with caltVersion.ts.
+ */
+function withCurrentPin(path: string, content: string): string {
+  if (path !== "pyproject.toml") return content;
+  return content
+    .split("\n")
+    .map((line) => {
+      const hash = line.indexOf("#");
+      const code = hash === -1 ? line : line.slice(0, hash);
+      const comment = hash === -1 ? "" : line.slice(hash);
+      const pinned = code.replace(
+        CALT_PIN_RE,
+        (_m, before: string, extras: string | undefined) =>
+          before + CALT_REQUIREMENT.replace("calt-x", `calt-x${extras ?? ""}`),
+      );
+      return pinned + comment;
+    })
+    .join("\n");
+}
+
 /** Build the full set of files (path -> content) the ZIP will contain. */
 export function projectFileMap(spec: ProjectSpec): Record<string, string> {
   const proj = toSnakeCase(spec.projectName) || "my_calt_project";
@@ -88,7 +120,7 @@ export function projectFileMap(spec: ProjectSpec): Record<string, string> {
   if (spec.customConfig) for (const f of buildFiles(spec.customConfig)) map[prefix + f.path] = f.content;
 
   if (spec.mode === "project") {
-    for (const [p, c] of Object.entries(COMMON_FILES)) map[prefix + p] = c;
+    for (const [p, c] of Object.entries(COMMON_FILES)) map[prefix + p] = withCurrentPin(p, c);
 
     // Note: wandb (optional progress logging) ships as a calt-x dependency, so the
     // conda install already covers it when a task turns logging on.
