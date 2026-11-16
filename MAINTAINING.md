@@ -104,7 +104,11 @@ The engine is pinned to `calt-x==1.6.0` (PyPI). The version is defined by
    the strings in **both** `en.ts` and `ja.ts`. Check the engine's config
    mapping for keys the new type requires: `MODEL_PRESETS`, `trainYaml` and
    `applySettings` only write the encoder/decoder key pairs (e.g. `monomial`
-   also needs `model.num_variables` and expanded-form data).
+   also needs `model.num_variables` and expanded-form data). A type the site
+   shows but cannot ship yet goes in `UNAVAILABLE_MODEL_TYPES` (codegen.ts): the
+   option is disabled, saved sessions and the ZIP fall back to `generic`.
+   `monomial` stays there until the site can pick a C/E lexer for a task and
+   write `model.num_variables` (groebner_basis already ships `lexer_expanded.yaml`).
 
 Work on a branch cut from `main` (one per pull request), not on `main` itself:
 every push to `main` deploys the site. Pull requests into `main` run the same

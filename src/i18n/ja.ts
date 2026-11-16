@@ -199,7 +199,7 @@ export const ja: Dict = {
     arch: "モデルアーキテクチャ",
     archInfoTitle: "モデルアーキテクチャ",
     archInfo:
-      "CALTが作るモデルの種類です。「Standard」はデフォルトのエンコーダ・デコーダです。「BART」はHugging Faceの実装です。「エンコーダのみ」はデコーダを外し、偶奇の判定のように答えが1トークンのタスクに使います。「デコーダのみ」は逆にエンコーダを外し、問題に続けて答えをひと続きの列として生成します。「Monomial」は係数と指数を1つの位置にまとめ、多項式の列を大幅に短くします（係数・指数のC/E形式のデータが必要です）。",
+      "CALTが作るモデルの種類です。「Standard」はデフォルトのエンコーダ・デコーダです。「BART」はHugging Faceの実装です。「エンコーダのみ」はデコーダを外し、偶奇の判定のように答えが1トークンのタスクに使います。「デコーダのみ」は逆にエンコーダを外し、問題に続けて答えをひと続きの列として生成します。「Monomial」は係数と指数を1つの位置にまとめ、多項式の列を大幅に短くします。係数・指数のC/E形式のデータと変数の数（num_variables）の指定が必要ですが、このサイトはまだこれらを書き出せないため、今は選べません。",
     archStandard: "Standard",
     archBart: "BART",
     // \u200B: break hint so a narrow button wraps as エンコーダ / のみ (see Segmented).
@@ -210,7 +210,7 @@ export const ja: Dict = {
     archNoteBart: "Hugging FaceのBARTです。Standardと同じ形のタスクを、別の実装で扱います。",
     archNoteEncoderClassifier: "デコーダを使わず、1トークンだけを予測します。答えが1つのラベルのときに使います。",
     archNoteDecoderOnly: "問題を読んだあと、その続きとして答えを1トークンずつ生成します（問題と答えをひと続きの列として扱います）。",
-    archNoteMonomial: "単項式1つを1つの位置として扱い、多項式の列を大幅に短くします（係数・指数のC/E形式のデータが必要です）。",
+    archNoteMonomial: "今は選べません。係数・指数のC/E形式のデータと変数の数（num_variables）の指定が必要ですが、このサイトはまだこれらを書き出せません。",
     rounds: "エポック数",
     roundsInfoTitle: "エポック数",
     roundsInfo: "学習データ全体を何周学習するかです（1周を1エポックと呼びます）。増やすと、ある程度までは精度が上がることがあります。",

@@ -1,4 +1,4 @@
-import { buildFiles, MODEL_PRESETS, type BuildConfig, type ModelPreset, type ModelType, type PosEmbedding } from "./codegen";
+import { buildFiles, MODEL_PRESETS, shippableModelType, type BuildConfig, type ModelPreset, type ModelType, type PosEmbedding } from "./codegen";
 import { CALT_REQUIREMENT } from "./caltVersion";
 import { TASK_FILES, COMMON_FILES } from "../generated/projectFiles";
 import { getTaskMeta } from "./tasks";
@@ -66,7 +66,7 @@ function applySettings(path: string, content: string, s: ProjectSettings): strin
     content = setYamlInt(content, "decoder_ffn_dim", m.ffn);
     content = setYamlInt(content, "num_train_epochs", s.epochs);
     content = setYamlStr(content, "use_positional_embedding", s.posEmbedding);
-    content = setYamlStr(content, "model_type", s.modelType);
+    content = setYamlStr(content, "model_type", shippableModelType(s.modelType));
     content = setYamlBool(content, "no_wandb", !s.useWandb);
   }
   return content;

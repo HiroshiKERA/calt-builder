@@ -257,7 +257,7 @@ export const en = {
     arch: "Model architecture",
     archInfoTitle: "Model architecture",
     archInfo:
-      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the Hugging Face implementation. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead: it reads the problem and writes the solution as one continuous sequence. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot; it needs data written as coefficient/exponent (C/E) tokens.",
+      "Which model CALT builds. “Standard” is the encoder-decoder used by default. “BART” is the Hugging Face implementation. “Encoder only” drops the decoder and predicts a single token, for targets like a parity bit. “Decoder only” drops the encoder instead: it reads the problem and writes the solution as one continuous sequence. “Monomial” packs a coefficient and its exponents into one sequence position, which shortens polynomial sequences a lot. It needs coefficient/exponent (C/E) tokens and the number of variables (num_variables), which this site can’t set up yet, so it can’t be selected for now.",
     archStandard: "Standard",
     archBart: "BART",
     archEncoderOnly: "Encoder only",
@@ -272,7 +272,7 @@ export const en = {
     archNoteDecoderOnly:
       "Reads the problem, then writes the solution as one continuous sequence, one token at a time.",
     archNoteMonomial:
-      "One position per monomial. Much shorter polynomial sequences; needs data written as coefficient/exponent (C/E) tokens.",
+      "Not available yet: needs coefficient/exponent (C/E) tokens and the number of variables (num_variables), which this site can’t set up yet.",
     rounds: "Training rounds",
     roundsInfoTitle: "Training rounds",
     roundsInfo:
