@@ -5,7 +5,7 @@ import { useT } from "../../i18n";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/controls";
-import { toSnakeCase, validateTaskName } from "../../lib/utils";
+import { toSnakeCase, validateFolderName } from "../../lib/utils";
 
 const HOW_ICONS = [Boxes, Pencil, Download];
 
@@ -21,7 +21,8 @@ const fade = {
 export function StepWelcome() {
   const { config, patch, setStep } = useWizard();
   const t = useT();
-  const error = config.projectName ? validateTaskName(config.projectName) : null;
+  const errorCode = config.projectName ? validateFolderName(config.projectName) : null;
+  const error = errorCode ? t.welcome.nameErrors[errorCode] : null;
   const canStart = !!config.projectName && !error;
   const start = () => canStart && setStep(1);
 
@@ -71,9 +72,9 @@ export function StepWelcome() {
             </div>
           </label>
           {error ? (
-            <p id="project-name-help" role="alert" className="mt-2 text-left text-xs font-medium text-rose-500">{error}</p>
+            <p id="project-name-help" role="alert" className="mt-2 text-left text-xs font-medium text-rose-700 dark:text-rose-400">{error}</p>
           ) : config.projectName ? (
-            <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400">{t.welcome.namedAs(toSnakeCase(config.projectName))}</p>
+            <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400 [overflow-wrap:anywhere]">{t.welcome.namedAs(toSnakeCase(config.projectName))}</p>
           ) : (
             <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400">{t.welcome.nameHelpEmpty}</p>
           )}

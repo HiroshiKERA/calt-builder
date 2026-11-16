@@ -166,7 +166,9 @@ class ${cls}:
 
   {
     id: "integer_factorization",
-    name: "Integer factorization",
+    // The name doubles as the default task name, whose folder must not collide
+    // with the ready-made integer_factorization task (see src/lib/names.ts).
+    name: "Prime factorization",
     icon: "Binary",
     tagline: "60  →  2^2 * 3 * 5",
     beginnerSummary: "Break a number down into the prime numbers that multiply to make it.",
@@ -279,6 +281,20 @@ class ${cls}:
     maxSeqLen: 160,
   },
 ];
+
+/**
+ * Default task names earlier versions used, mapped to their replacement. Old
+ * sessions holding one are migrated on load, and it still counts as untouched.
+ * "Integer factorization" collided with the ready-made integer_factorization task.
+ */
+const LEGACY_TEMPLATE_NAMES: Record<string, string> = {
+  "Integer factorization": "Prime factorization",
+};
+
+/** The replacement for a legacy default task name, or null (own keys only, so "constructor" is not a match). */
+export function legacyTemplateRename(name: string): string | null {
+  return Object.prototype.hasOwnProperty.call(LEGACY_TEMPLATE_NAMES, name) ? LEGACY_TEMPLATE_NAMES[name] : null;
+}
 
 export function getTemplate(id: string): Template {
   const t = TEMPLATES.find((x) => x.id === id);

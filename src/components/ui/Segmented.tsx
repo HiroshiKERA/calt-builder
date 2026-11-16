@@ -35,7 +35,10 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className="inline-flex w-full rounded-xl bg-ink-100 p-1"
+      // Below sm, options that cannot fit side by side move to a new row instead
+      // of widening the page (the Settings card overflowed on phones). From sm up
+      // the layout is unchanged: one row, labels wrap inside their button.
+      className="inline-flex w-full flex-wrap gap-y-1 rounded-xl bg-ink-100 p-1 sm:flex-nowrap"
     >
       {options.map((o, idx) => {
         const active = o.value === value;

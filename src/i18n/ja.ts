@@ -20,6 +20,11 @@ export const ja: Dict = {
     getStarted: "はじめる",
     nameHelpEmpty: "これはダウンロードされるプロジェクトフォルダの名前を決めるだけです。いつでも変更できます。",
     namedAs: (snake: string) => `プロジェクトのフォルダ名は「${snake}」になります。`,
+    nameErrors: {
+      empty: "プロジェクト名を入力してください。",
+      invalid: "英字・数字・スペース・ハイフン・アンダースコアを使ってください。",
+      tooLong: "フォルダ名が40文字を超えます。もっと短い名前にしてください。",
+    },
     howTitle: "使い方",
     how: [
       { title: "タスクを選ぶ", body: "用意されたCALTのサンプルタスクから選ぶか、ゼロから自分で作ります。" },
@@ -50,6 +55,14 @@ export const ja: Dict = {
     startFrom: "テンプレートから始める",
     customNameLabel: "タスク名",
     customNamePlaceholder: "例：2つの数を足す",
+    nameTaken: (folder: string) =>
+      `「${folder}」はサンプルタスクか shared/ と同じフォルダ名です。別の名前にしてください。`,
+    nameReserved: (folder: string) =>
+      `「${folder}」は Python、インストール済みのパッケージ、生成されるスクリプト、OS のいずれかがすでに使っている名前と重なるため、タスクのフォルダ名にできません。別の名前にしてください。`,
+    nameTooLong: "フォルダ名が40文字を超えます。もっと短い名前にしてください。",
+    nameFallback: "この名前には使える英字・数字がないため、タスクのフォルダ名は「my_task」になります。",
+    nameFallbackEmpty: "名前が空のため、タスクのフォルダ名は「my_task」になります。",
+    customNameAlert: (message: string) => `自分のタスク：${message}`,
     measurements: "測定する項目（任意）",
     measurementsHint: "自分のタスクのデータについて計算される統計です。",
     tokenizer: "トークナイザ / 語彙（任意）",
@@ -105,6 +118,8 @@ export const ja: Dict = {
     empty: "まだタスクが選択されていません。戻って少なくとも1つ追加してください。",
     download: "ダウンロード",
     saved: "保存しました。下の「使い方」をご覧ください。",
+    downloadBlocked: "自分のタスクの名前が使えません。ステップ1に戻って名前を変更してください。",
+    downloadFailed: "ダウンロードを作成できませんでした。ページを再読み込みしてから、もう一度お試しください。",
     settings: "自分のタスクの設定",
     optional: "任意",
     examplesQ: "学習サンプル数",

@@ -21,15 +21,24 @@ export function toSnakeCase(input: string): string {
   return /^[0-9]/.test(cleaned) ? `task_${cleaned}` : cleaned;
 }
 
-/** Derive a PascalCase class name from a task name, e.g. "my_task" -> "MyTask". */
+/**
+ * Derive a PascalCase class name from a task name, e.g. "my_task" -> "MyTask".
+ * Names with no usable characters use the same my_task fallback as the folder,
+ * so an empty name gives MyTask everywhere (the ZIP passes `name || "my_task"`).
+ */
 export function toGeneratorClassName(taskName: string): string {
-  const snake = toSnakeCase(taskName) || "task";
+  const snake = toSnakeCase(taskName) || "my_task";
   const pascal = snake
     .split("_")
     .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join("");
   return pascal || "Task";
+}
+
+/** Text safe to put inside a Python triple-quoted docstring (backslashes, triple quotes). */
+export function pyDocText(text: string): string {
+  return text.replace(/\\/g, "\\\\").replace(/"""/g, '\\"\\"\\"');
 }
 
 /**
@@ -48,14 +57,16 @@ export function renameTaskInCode(code: string, oldName: string, newName: string)
 
   const oldClass = toGeneratorClassName(oldName);
   const newClass = toGeneratorClassName(newName);
-  // Class names are [A-Za-z0-9]+, so a \b word-boundary match is safe.
+  // Only the class definition: the name is derived from every keystroke, so
+  // replacing all occurrences would rewrite unrelated code whenever an
+  // intermediate name matched it (typing "none…" turned every None into the class).
   if (oldClass !== newClass) {
-    out = out.replace(new RegExp(`\\b${oldClass}\\b`, "g"), newClass);
+    out = out.replace(new RegExp(`\\bclass\\s+${oldClass}\\b`, "g"), `class ${newClass}`);
   }
 
   // Header comment: "...pairs for the <name> task." (literal replace, no regex).
-  const oldDisplay = oldName.trim() || "my_task";
-  const newDisplay = newName.trim() || "my_task";
+  const oldDisplay = pyDocText(oldName.trim() || "my_task");
+  const newDisplay = pyDocText(newName.trim() || "my_task");
   if (oldDisplay !== newDisplay) {
     out = out.split(`for the ${oldDisplay} task`).join(`for the ${newDisplay} task`);
   }
@@ -68,12 +79,17 @@ export function isValidIdentifier(name: string): boolean {
   return /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
 }
 
-/** A human-friendly check that a task name is usable. Returns an error string or null. */
-export function validateTaskName(name: string): string | null {
-  if (!name.trim()) return "Please enter a task name.";
+export type FolderNameError = "empty" | "invalid" | "tooLong";
+
+/**
+ * Check that a name gives a usable project folder. Returns an error code (the
+ * component maps it to a message in the UI language) or null.
+ */
+export function validateFolderName(name: string): FolderNameError | null {
+  if (!name.trim()) return "empty";
   const snake = toSnakeCase(name);
-  if (!snake) return "Use letters, numbers, spaces, hyphens or underscores.";
-  if (snake.length > 40) return "That name is a bit long, keep it under 40 characters.";
+  if (!snake) return "invalid";
+  if (snake.length > 40) return "tooLong";
   return null;
 }
 

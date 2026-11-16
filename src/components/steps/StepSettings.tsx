@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { PackageOpen, ArrowLeft } from "lucide-react";
-import { useWizard, hasSelection, customBuildConfig, type TaskSettings } from "../../state/store";
+import { useWizard, hasSelection, customBuildConfig, customTaskIssue, type TaskSettings } from "../../state/store";
 import { useT } from "../../i18n";
 import { type ModelPreset, type ModelType, type PosEmbedding } from "../../lib/codegen";
 import { ConfigPreview } from "../ConfigPreview";
@@ -272,7 +272,10 @@ export function StepSettings() {
       )}
 
       {currentTab && (
-        <div className="grid gap-4 xl:grid-cols-[1fr_minmax(0,400px)] xl:items-start">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_minmax(0,400px)] xl:items-start">
+          {/* grid-cols-1 is minmax(0, 1fr): without it the single column grew to its
+              content's min width, so a wide control pushed the card past the edge of
+              a phone screen. The xl layout keeps its original tracks. */}
           <Card
             role="tabpanel"
             id={`settings-panel-${currentTab.id}`}
@@ -298,7 +301,13 @@ export function StepSettings() {
 
       <p className="mt-4 text-xs text-ink-400">{t.settings.appliesNote}</p>
 
-      <StepFooter onContinue={next} continueLabel={t.settings.continueLabel} />
+      {/* An old session can still hold a custom task name that is no longer allowed. */}
+      {customTaskIssue(config) && (
+        <p role="alert" className="mt-6 rounded-xl bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-700 ring-1 ring-rose-500/25 dark:text-rose-300">
+          {t.review.downloadBlocked}
+        </p>
+      )}
+      <StepFooter onContinue={next} continueDisabled={!!customTaskIssue(config)} continueLabel={t.settings.continueLabel} />
     </div>
   );
 }

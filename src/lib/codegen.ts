@@ -4,7 +4,8 @@
 
 import { getTemplate, type ParamValues } from "./templates";
 import { STATS } from "./stats";
-import { toSnakeCase, toGeneratorClassName } from "./utils";
+import { pyDocText, toGeneratorClassName } from "./utils";
+import { customFolderName } from "./names";
 
 export type ModelPreset = "small" | "medium" | "large";
 
@@ -115,7 +116,7 @@ function generatorPy(cfg: BuildConfig, className: string): string {
     return cfg.customGeneratorCode.replace(/\s*$/, "") + "\n";
   }
   const header = `"""
-Generate (problem, answer) pairs for the ${cfg.taskName} task.
+Generate (problem, answer) pairs for the ${pyDocText(cfg.taskName)} task.
 
 Input  : ${t.exampleInput}
 Output : ${t.exampleOutput}
@@ -172,7 +173,7 @@ function metricsPy(cfg: BuildConfig): string {
     : "";
 
   return `"""
-Per-sample statistics and the success metric for the ${cfg.taskName} task.
+Per-sample statistics and the success metric for the ${pyDocText(cfg.taskName)} task.
 
   instance_stats  -> passed to DatasetPipeline as its 'statistics_calculator';
                      called once per generated sample. The aggregated values
@@ -212,7 +213,7 @@ __all__ = [
 
 function trainPy(cfg: BuildConfig): string {
   return `"""
-Training runner for the ${cfg.taskName} task.
+Training runner for the ${pyDocText(cfg.taskName)} task.
 
 Plain-text storage ("input # output" per line) means CALT's default text loader
 handles parsing, so no custom preprocessor is needed.
@@ -350,6 +351,27 @@ data:
 `;
 }
 
+/**
+ * Import lines for the task package, wrapped so that a folder name clashing with
+ * an installed module (which wins over the task's namespace folder) stops with
+ * an explanation instead of "No module named '<name>.core'". The site rejects
+ * known clashes; this covers packages installed later.
+ */
+function taskImports(snake: string, lines: string[]): string {
+  return `try:
+${lines.map((l) => `    ${l}`).join("\n")}
+except ModuleNotFoundError as err:
+    # Only the task's own modules: a missing third-party import, or a missing
+    # helper file inside the task, is a different problem and is re-raised.
+    if err.name not in ("${snake}.core", ${lines.map((l) => `"${l.split(" ")[1]}"`).join(", ")}):
+        raise
+    sys.exit(
+        f"Cannot import the task package '${snake}' ({err}). Its folder name clashes "
+        "with an installed Python module. Rename the task in the CALT Task Builder "
+        "and download the project again."
+    )`;
+}
+
 function generateScript(snake: string, className: string): string {
   return `"""Generate the dataset for the ${snake} toy experiment."""
 
@@ -363,8 +385,12 @@ from omegaconf import OmegaConf
 
 from calt.dataset import DatasetPipeline
 
-from ${snake}.core.generator import ${className}
-from ${snake}.core.metrics import instance_stats
+# Imported under a fixed alias so the class (named after the task) can never
+# replace Path, OmegaConf or DatasetPipeline above.
+${taskImports(snake, [
+  `from ${snake}.core.generator import ${className} as TaskGenerator`,
+  `from ${snake}.core.metrics import instance_stats`,
+])}
 from shared.paths import config_dir
 from shared.seed import set_seed
 
@@ -382,7 +408,7 @@ def main(config_path: str | None) -> None:
     set_seed(cfg.dataset.root_seed)
 
     gen_cfg = OmegaConf.to_container(cfg.problem_generator, resolve=True) or {}
-    problem_generator = ${className}(**gen_cfg)
+    problem_generator = TaskGenerator(**gen_cfg)
 
     pipeline = DatasetPipeline.from_config(
         cfg.dataset,
@@ -408,7 +434,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 import click
 
-from ${snake}.core.train import run_training
+${taskImports(snake, [`from ${snake}.core.train import run_training`])}
 from shared.config import load_config
 from shared.paths import config_dir
 from shared.seed import set_seed
@@ -492,9 +518,10 @@ One example per line is stored as \`input # output\`.
 ${deps}${sageNote}
 ## Quick start
 
-1. Copy this whole \`${snake}/\` folder into the root of your CALT codebase
-   (next to \`parity/\`, \`groebner_basis/\`, \`shared/\` …).
-2. Activate the environment that has \`calt-x\` installed.
+1. Open a terminal in the project folder (the one that contains this
+   \`${snake}/\` folder and \`shared/\`). To reuse this task in another CALT
+   project, copy the folder into that project's root, next to its \`shared/\`.
+2. Activate the environment: \`conda activate calt-env\` (see the project README).
 3. Run the 3-step workflow:
 
 \`\`\`bash
@@ -538,7 +565,7 @@ export function freshGeneratorCode(cfg: BuildConfig): string {
 }
 
 export function buildFiles(cfg: BuildConfig): FileSpec[] {
-  const snake = toSnakeCase(cfg.taskName) || "my_task";
+  const snake = customFolderName(cfg.taskName);
   const className = toGeneratorClassName(cfg.taskName);
   const base = snake;
 
