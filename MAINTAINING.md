@@ -105,7 +105,10 @@ The engine is pinned to `calt-x==1.6.0` (PyPI). The version is defined by
    `applySettings` only write the encoder/decoder key pairs (e.g. `monomial`
    also needs `model.num_variables` and expanded-form data).
 
-Work on a branch, not `main`: every push to `main` deploys the site.
+Work on a branch cut from `main` (one per pull request), not on `main` itself:
+every push to `main` deploys the site. Pull requests into `main` run the same
+`npm run build` (`.github/workflows/pr-check.yml`), so a failing pin check, type
+error or build shows up on the PR before it is merged.
 
 > Related: the **Position embedding** "Learned" option writes the value `generic`.
 > The engine also accepts `learned` as an alias, so emitting `learned` instead is

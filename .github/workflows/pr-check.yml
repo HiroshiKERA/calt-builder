@@ -1,0 +1,22 @@
+name: Build check
+
+# Every push to main deploys the site (deploy.yml), so run the same build on
+# pull requests first: the engine-pin check, the type check and the Vite build
+# then fail on the PR instead of after the merge.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
