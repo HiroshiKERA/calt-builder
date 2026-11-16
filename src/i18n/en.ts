@@ -280,7 +280,7 @@ export const en = {
     logging: "Progress logging",
     loggingInfoTitle: "Weights & Biases",
     loggingInfo:
-      "An optional online dashboard for following training as it runs (Weights & Biases). It is already installed with CALT; to use it, you need a free account and to run “wandb login” once. Leave it off if you don't need it.",
+      "An optional online dashboard for following training as it runs (Weights & Biases). It is already installed with CALT; to use it, you need a free account, and you must run “wandb login” once. Leave it off if you don't need it.",
     on: "On",
     off: "Off",
     treeTitle: "What's inside",
@@ -327,7 +327,7 @@ export const en = {
     title: "Settings",
     subtitle: "Fine-tune each task's training settings. The defaults already work well.",
     appliesNote:
-      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of training examples, train.yaml for the model size, architecture, training rounds, position embedding and logging, and lexer.yaml for the tokenizer vocabulary.",
+      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of training examples, train.yaml for the model size, position embedding, architecture, training rounds and logging, and lexer.yaml for the tokenizer vocabulary.",
     noTasks: "No tasks selected yet. Go back and pick at least one.",
     continueLabel: "Continue",
     previewLegend: "This is what your settings write into the task's config files. Highlighted lines are the ones the controls edit; a line flashes when it changes.",

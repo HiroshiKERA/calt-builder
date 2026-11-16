@@ -8,7 +8,8 @@ import type { TemplateId } from "../lib/templates";
 // 測定 / 統計, 位置埋め込み, 学習型 / 正弦波 / なし, エンコーダのみ / デコーダのみ,
 // エンコーダ・デコーダ, オンライン記録. Kept in English: Standard, Monomial, RoPE,
 // BART, Hugging Face, Weights & Biases, file names and code. No space between
-// Japanese and Latin words (CALTプロジェクト), except around file names and code.
+// Japanese and Latin words (CALTプロジェクト), except around file names, code and
+// character ranges (a–z, 0–9, _).
 // Labels quoted inside other strings (e.g. 「小規模」 in examplesInfo) must be
 // updated together.
 
@@ -162,7 +163,7 @@ export const ja: Dict = {
     empty: "まだタスクが選ばれていません。戻って1つ以上追加してください。",
     download: "ダウンロード",
     saved: "保存しました。下の「ダウンロード後の使い方」をご覧ください。",
-    downloadBlocked: "自分のタスクの名前が使えません。ステップ 1 の「自分のタスクを作る」で、タスク名を変更してください。",
+    downloadBlocked: "自分のタスクの名前が使えません。ステップ 1の「自分のタスクを作る」で、タスク名を変更してください。",
     downloadFailed: "ダウンロードを作成できませんでした。ページを再読み込みしてから、もう一度お試しください。",
     examplesQ: "学習データの数",
     examplesInfoTitle: "学習データの数",

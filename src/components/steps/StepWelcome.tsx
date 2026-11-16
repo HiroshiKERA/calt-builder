@@ -35,16 +35,19 @@ export function StepWelcome() {
           initial="hidden"
           animate="show"
           // Japanese: title / highlight on their own lines. From sm up each stays on
-          // one line (two lines in all), sized to the viewport so the longer first
-          // line (about 16em) fits; on phones the title also breaks once, at its
-          // U+200B, so the heading keeps a readable size (three lines).
-          className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px] [&:lang(ja)]:text-[length:min(30px,8.4vw)] sm:[&:lang(ja)]:text-[length:min(40px,calc((100vw-48px)/16))]"
+          // one line (two lines in all), sized so the longer first line (about
+          // 17.2em) fits: 100vw also counts a classic scrollbar, hence 64px and /18.
+          // Below sm the title may also break at its U+200B, so on phones the
+          // heading keeps a readable size (three lines below about 550px).
+          className="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-ink-900 sm:text-[52px] [&:lang(ja)]:text-[length:min(30px,8.4vw)] sm:[&:lang(ja)]:text-[length:min(40px,calc((100vw-64px)/18))]"
         >
           <span className="[&:lang(ja)]:block [&:lang(ja)]:break-keep sm:[&:lang(ja)]:whitespace-nowrap">{t.welcome.title}</span>
           {/* Japanese breaks via the block spans instead, so this <br> is hidden there. */}
           <br className="hidden sm:block [&:lang(ja)]:hidden" />
           {t.welcome.titleJoiner}
-          <span className="gradient-text [&:lang(ja)]:block [&:lang(ja)]:whitespace-nowrap">{t.welcome.titleHighlight}</span>
+          {/* inline-block (not block) so the gradient spans the text, not the full width;
+              the block title before it already starts a new line. */}
+          <span className="gradient-text [&:lang(ja)]:inline-block [&:lang(ja)]:whitespace-nowrap">{t.welcome.titleHighlight}</span>
         </motion.h1>
 
         <motion.p

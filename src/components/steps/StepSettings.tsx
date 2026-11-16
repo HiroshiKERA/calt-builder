@@ -69,7 +69,7 @@ function TaskSettingsForm({ settings, onChange }: TaskSettingsFormProps) {
             const p = SIZE_PRESETS.find((x) => x.value === v)!;
             onChange({ numTrain: p.train, numTest: p.test });
           }}
-          options={SIZE_PRESETS.map((p) => ({ value: p.value, label: `${sizeLabel[p.value]} · ${p.train.toLocaleString(lang)}` }))}
+          options={SIZE_PRESETS.map((p) => ({ value: p.value, label: `${sizeLabel[p.value]}\u00A0· ${p.train.toLocaleString(lang)}` }))} // no-break space: the "·" stays with the label
         />
       </div>
 
