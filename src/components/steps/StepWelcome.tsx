@@ -6,6 +6,7 @@ import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/controls";
 import { dropsCharacters, toSnakeCase, validateFolderName } from "../../lib/utils";
+import { Lines } from "../ui/Lines";
 
 const HOW_ICONS = [Boxes, Pencil, Download];
 
@@ -59,7 +60,7 @@ export function StepWelcome() {
           // not left alone on the last one.
           className="mx-auto mt-5 max-w-2xl text-balance text-lg leading-relaxed text-ink-500"
         >
-          {t.welcome.subtitle}
+          <Lines text={t.welcome.subtitle} brClassName="hidden sm:block" />
         </motion.p>
       </div>
 
@@ -113,7 +114,10 @@ export function StepWelcome() {
                     <span className="text-xs font-bold uppercase tracking-wide text-ink-400">{i + 1}</span>
                   </div>
                   <h3 className="mt-3 text-[15px] font-bold text-ink-900">{h.title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-ink-500">{h.body}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-ink-500">
+                    {/* The three cards are narrow below lg, so breaks apply from lg up. */}
+                    <Lines text={h.body} brClassName="hidden lg:block" />
+                  </p>
                 </Card>
               </motion.div>
             );

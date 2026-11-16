@@ -10,6 +10,8 @@ import type { TemplateId } from "../lib/templates";
 // BART, Hugging Face, Weights & Biases, file names and code. No space between
 // Japanese and Latin words (CALTプロジェクト), except around file names, code and
 // character ranges (a–z, 0–9, _).
+// "\n" in welcome.subtitle, welcome.how[2].body and tasks.subtitle marks hand-picked
+// line breaks, shown only on screens wide enough (see components/ui/Lines.tsx).
 // Labels quoted inside other strings (e.g. 「小規模」 in examplesInfo) must be
 // updated together.
 
@@ -31,7 +33,7 @@ export const ja: Dict = {
     titleHighlight: "ブラウザで簡単に作成",
     titleJoiner: "",
     subtitle:
-      "用意されたタスクを選んで設定を少し調整すれば、すぐ実行できるプロジェクト一式をダウンロードできます。あとはコマンドをコピー＆ペーストするだけで、自分のパソコンで学習を始められます。",
+      "用意されたタスクを選んで設定を少し調整すれば、すぐ実行できる\nプロジェクト一式をダウンロードできます。あとはコマンドを\nコピー＆ペーストするだけで、自分のパソコンで学習を始められます。",
     nameLabel: "プロジェクト名",
     namePlaceholder: "例：My CALT project",
     getStarted: "はじめる",
@@ -47,7 +49,7 @@ export const ja: Dict = {
     how: [
       { title: "タスクを選ぶ", body: "用意されたサンプルタスクから選ぶか、自分でタスクを作ります。" },
       { title: "自分のタスクを作る（任意）", body: "コードを自分で書くか、やりたいことを説明してAIに書いてもらいます。" },
-      { title: "ダウンロード", body: "すぐ実行できるプロジェクト一式をZIPで受け取ります。" },
+      { title: "ダウンロード", body: "すぐ実行できるプロジェクト一式を\nZIPで受け取ります。" },
     ],
     trustBrowser: "ブラウザ内で完結し、何もアップロードされません",
     trustSetup: "インストール不要、ブラウザだけで使えます",
@@ -57,7 +59,7 @@ export const ja: Dict = {
     eyebrow: "ステップ 1",
     title: "タスクを定義する",
     subtitle:
-      "自分でタスクを作るか、用意されたサンプルタスクを追加しましょう（両方でもかまいません）。サンプルタスクはどれも完成済みで、そのまま実行できます。",
+      "自分でタスクを作るか、用意されたサンプルタスクを追加しましょう（両方でもかまいません）。\nサンプルタスクはどれも完成済みで、そのまま実行できます。",
     chooseReal: "サンプルタスクを追加",
     sageNote:
       "一部のタスクには無料の数学ソフトSageMathが必要です。condaのセットアップに含まれているので、追加のインストールは不要です。",
