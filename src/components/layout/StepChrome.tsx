@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useWizard } from "../../state/store";
 import { useT } from "../../i18n";
 import { Button } from "../ui/Button";
+import { Lines } from "../ui/Lines";
 
 export function StepHeader({
   eyebrow,
@@ -24,7 +25,10 @@ export function StepHeader({
         {title}
       </h1>
       {subtitle && (
-        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink-500">{subtitle}</p>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink-500">
+          {/* "\n" in a subtitle is a hand-picked break, applied from md (768px) up. */}
+          {typeof subtitle === "string" ? <Lines text={subtitle} brClassName="hidden md:block" /> : subtitle}
+        </p>
       )}
     </div>
   );
