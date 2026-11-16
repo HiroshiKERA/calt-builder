@@ -18,7 +18,7 @@ import { Field, TextInput, TextArea } from "../ui/controls";
 import { Icon } from "../Icon";
 import { StepHeader, StepFooter } from "../layout/StepChrome";
 import { StepDetails } from "../layout/StepDetails";
-import { cn, downloadBlob, renameTaskInCode } from "../../lib/utils";
+import { cn, downloadBlob, dropsCharacters, renameTaskInCode } from "../../lib/utils";
 
 type Dict = ReturnType<typeof useT>;
 
@@ -450,17 +450,24 @@ function CustomBuilder() {
             onChange={(e) => renameTask(e.target.value)}
             onBlur={syncCode}
             aria-invalid={!!nameIssue}
-            aria-describedby={nameIssue || usesFallbackFolder(config.custom.name) ? "custom-name-help" : undefined}
+            aria-describedby="custom-name-help"
           />
+          {/* Exactly one of: why the name can't be used, the my_task fallback, or
+              the folder the name becomes (plus a note when characters are dropped). */}
           {nameIssue ? (
-            <p id="custom-name-help" className="mt-1.5 text-xs font-medium leading-snug text-rose-700 dark:text-rose-400">
+            <p id="custom-name-help" className="mt-1.5 text-xs font-medium leading-snug text-rose-700 [overflow-wrap:anywhere] dark:text-rose-400">
               {nameIssueText(t, nameIssue, config.custom.name)}
             </p>
           ) : usesFallbackFolder(config.custom.name) ? (
             <p id="custom-name-help" className="mt-1.5 text-xs leading-snug text-ink-500">
               {config.custom.name.trim() ? t.tasks.nameFallback : t.tasks.nameFallbackEmpty}
             </p>
-          ) : null}
+          ) : (
+            <p id="custom-name-help" className="mt-1.5 text-xs leading-snug text-ink-500 [overflow-wrap:anywhere]">
+              {t.tasks.folderAs(customFolderName(config.custom.name))}
+              {dropsCharacters(config.custom.name) && <> {t.tasks.nameDropped}</>}
+            </p>
+          )}
           <p className="mt-1.5 hidden text-xs leading-snug text-ink-400 lg:block">
             {t.tasks.buildOwnDesc}
           </p>

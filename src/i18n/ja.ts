@@ -28,10 +28,11 @@ export const ja: Dict = {
     subtitle:
       "用意されたタスクを選んで設定を少し調整すれば、すぐ実行できるプロジェクト一式をダウンロードできます。あとはコマンドをコピー＆ペーストするだけで、自分のパソコンで学習を始められます。",
     nameLabel: "プロジェクト名",
-    namePlaceholder: "例：私のCALTプロジェクト",
+    namePlaceholder: "例：My CALT project",
     getStarted: "はじめる",
     nameHelpEmpty: "ダウンロードするプロジェクトのフォルダ名になります。あとから変更できます。",
     namedAs: (snake: string) => `プロジェクトのフォルダ名は「${snake}」になります。`,
+    nameDropped: "フォルダ名には a–z、0–9、_ だけが使われるため、それ以外の文字は省かれます。",
     nameErrors: {
       empty: "プロジェクト名を入力してください。",
       invalid: "英字（a–z）か数字を1文字以上含めてください。フォルダ名には a–z、0–9、_ だけが使われます。",
@@ -65,7 +66,7 @@ export const ja: Dict = {
     continueLabel: "次へ",
     startFrom: "テンプレートから始める",
     customNameLabel: "タスク名",
-    customNamePlaceholder: "例：2つの数を足す",
+    customNamePlaceholder: "例：Add two numbers",
     nameTaken: (folder: string) =>
       `「${folder}」はサンプルタスクか shared/ と同じフォルダ名です。別の名前にしてください。`,
     nameReserved: (folder: string) =>
@@ -73,6 +74,8 @@ export const ja: Dict = {
     nameTooLong: "フォルダ名が40文字を超えます。もっと短い名前にしてください。",
     nameFallback: "この名前には a–z の英字や数字がないため、タスクのフォルダ名は「my_task」になります。",
     nameFallbackEmpty: "名前が空のため、タスクのフォルダ名は「my_task」になります。",
+    folderAs: (folder: string) => `タスクのフォルダ名は「${folder}」になります。`,
+    nameDropped: "フォルダ名には a–z、0–9、_ だけが使われるため、それ以外の文字は省かれます。",
     customNameAlert: (message: string) => `自分のタスク：${message}`,
     measurementsHint: "自分のタスクのデータについて計算する統計です。",
     tabGenerator: "ジェネレータ",

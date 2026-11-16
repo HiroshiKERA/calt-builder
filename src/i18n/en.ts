@@ -116,6 +116,7 @@ export const en = {
     nameHelpEmpty:
       "This only sets the name of the downloaded project folder. You can rename it anytime.",
     namedAs: (snake: string) => `Your project folder will be named “${snake}”.`,
+    nameDropped: "Folder names use only a–z, 0–9 and _, so the other characters are left out.",
     nameErrors: {
       empty: "Please enter a project name.",
       invalid: "Include at least one letter (a–z) or digit. Folder names keep only a–z, 0–9 and _.",
@@ -166,6 +167,8 @@ export const en = {
     nameTooLong: "The folder name would be over 40 characters. Choose a shorter name.",
     nameFallback: "This name has no a–z letters or digits, so the task folder will be named “my_task”.",
     nameFallbackEmpty: "Without a name, the task folder will be named “my_task”.",
+    folderAs: (folder: string) => `The task folder will be named “${folder}”.`,
+    nameDropped: "Folder names use only a–z, 0–9 and _, so the other characters are left out.",
     customNameAlert: (message: string) => `Your own task: ${message}`,
     measurementsHint: "Statistics computed about your custom task's data.",
     tabGenerator: "Generator",

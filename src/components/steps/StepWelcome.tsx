@@ -5,7 +5,7 @@ import { useT } from "../../i18n";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/controls";
-import { toSnakeCase, validateFolderName } from "../../lib/utils";
+import { dropsCharacters, toSnakeCase, validateFolderName } from "../../lib/utils";
 
 const HOW_ICONS = [Boxes, Pencil, Download];
 
@@ -74,7 +74,10 @@ export function StepWelcome() {
           {error ? (
             <p id="project-name-help" role="alert" className="mt-2 text-left text-xs font-medium text-rose-700 dark:text-rose-400">{error}</p>
           ) : config.projectName ? (
-            <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400 [overflow-wrap:anywhere]">{t.welcome.namedAs(toSnakeCase(config.projectName))}</p>
+            <p id="project-name-help" className="mt-2 text-left text-xs text-ink-500 [overflow-wrap:anywhere]">
+              {t.welcome.namedAs(toSnakeCase(config.projectName))}
+              {dropsCharacters(config.projectName) && <> {t.welcome.nameDropped}</>}
+            </p>
           ) : (
             <p id="project-name-help" className="mt-2 text-left text-xs text-ink-400">{t.welcome.nameHelpEmpty}</p>
           )}
