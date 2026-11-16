@@ -45,7 +45,9 @@ export function StepWelcome() {
           custom={1}
           initial="hidden"
           animate="show"
-          className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-ink-500"
+          // text-balance evens out the lines, so a single word ("commands.") is
+          // not left alone on the last one.
+          className="mx-auto mt-5 max-w-2xl text-balance text-lg leading-relaxed text-ink-500"
         >
           {t.welcome.subtitle}
         </motion.p>
@@ -66,7 +68,7 @@ export function StepWelcome() {
                 aria-describedby="project-name-help"
                 className="h-12 text-[15px]"
               />
-              <Button size="lg" shimmer disabled={!canStart} onClick={start} className="sm:w-auto">
+              <Button size="lg" shimmer disabled={!canStart} onClick={start} className="whitespace-nowrap sm:w-auto sm:shrink-0">
                 {t.welcome.getStarted} <ArrowRight size={18} />
               </Button>
             </div>
