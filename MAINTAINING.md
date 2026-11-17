@@ -74,6 +74,16 @@ patches `experiments/toy/configs/{data,train}.yaml` by key name
 
 1. Create the task folder under **`task-sources/`** (needs `core/generator.py`
    returning `(str, str)`, `core/train.py`, and toy `configs/{data,train,lexer}.yaml`).
+   Set `max_sequence_length` in the toy `train.yaml` to at least the longest
+   problem and the longest answer, in tokens including BOS/EOS, at the dataset
+   sizes the site offers. Generating 1M samples with Sage is slow, so measure
+   100k and keep a margin for the tail. calt's generic model allocates twice
+   the value and decoder_only needs problem + answer within twice it, so a
+   value that is too small can still work there; BART uses it as its exact
+   positional limit and stops mid-training with "index out of range" (this
+   happened with polynomial_addition at 256; its answers reach 345 tokens at
+   1M). Measure with calt's lexer: `calt.io.preprocess`'s private helpers
+   `_build_lexer_and_tokenizer` and `_tokenize_to_ids` on the generated data.
 2. Re-bundle (above): `npm run bundle`.
 3. In `src/lib/tasks.ts` add the id to `ALLOWED_TASK_IDS` and an entry in `META`
    (icon, `needsSage`).
