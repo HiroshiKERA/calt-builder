@@ -6,8 +6,13 @@ requires-python = ">=3.11"
 dependencies = [
     # The CALT engine (PyPI), in the version these tasks were tested with.
     # calt-x 1.5.0 and earlier crash at training start with the transformers
-    # that pip installs today (>= 5.15), so do not go below this version.
-    "calt-x==1.6.0",
+    # that pip installs today (>= 5.15), and 1.6.0 turns W&B on in --dryrun and
+    # ignores the cosine schedule, so do not go below this version.
+    # calt-x pulls in torch. Inside the README's conda env, pip keeps the
+    # conda-forge PyTorch already there; do not pip install torch into that env,
+    # pip's GPU build breaks `import calt` on many Linux systems
+    # (CXXABI_1.3.15 not found). Outside conda, pip installs PyPI's torch.
+    "calt-x==1.6.1",
     "omegaconf>=2.3.0",
     "matplotlib>=3.7.0",
     "click>=8.0.0",

@@ -1,11 +1,18 @@
-import { CALT_REQUIREMENT } from "./caltVersion";
+import {
+  CALT_REQUIREMENT,
+  ACTIVATE_AND_PIP,
+  CHECK_COMMAND,
+  CONDA_CREATE_CPU,
+  CONDA_CREATE_GPU,
+  PIP_INSTALL,
+} from "./caltVersion";
 // Generates the README.md placed at the root of a "full project" download.
 // Plain, beginner-friendly, English (it sits next to the code).
 //
 // Installation is conda-based: a single `calt-env` environment that bundles
-// SageMath (needed by the polynomial tasks) via conda-forge, with calt-x and the
-// small pip extras installed on top. This mirrors the environment the tasks were
-// tested in, so every task — including groebner_basis / border_basis — works.
+// SageMath (needed by the polynomial tasks) and PyTorch from conda-forge, with
+// calt-x and the small pip extras installed on top. Why PyTorch must come from
+// conda, not pip: see caltVersion.ts.
 
 export interface ReadmeOpts {
   projectName: string;
@@ -13,6 +20,8 @@ export interface ReadmeOpts {
   taskFolders: string[];
   /** Subset of taskFolders that require SageMath (informational only). */
   sageTasks: string[];
+  /** True when at least one shipped task has W&B progress logging turned on. */
+  useWandb: boolean;
 }
 
 export function buildProjectReadme(o: ReadmeOpts): string {
@@ -25,6 +34,14 @@ export function buildProjectReadme(o: ReadmeOpts): string {
         .map((t) => `\`${t}\``)
         .join(", ")}). The conda environment above already includes it, so there
 > is nothing extra to install.\n`
+    : "";
+
+  const wandbNote = o.useWandb
+    ? `
+> **Progress logging (W&B) is on** for at least one task. Before the first real
+> run, log in once with \`wandb login\` (free account at https://wandb.ai). Quick
+> tests with \`python train.py --dryrun\` never log to W&B, so they need no login.
+`
     : "";
 
   return `# ${o.projectName}
@@ -43,33 +60,94 @@ polynomial ones.
 > Don't have conda yet? Install **Miniforge** first:
 > https://github.com/conda-forge/miniforge
 
-Open a terminal in this folder and run, one line at a time:
+These steps are for Linux and macOS. On Windows, use WSL2 (Ubuntu) and follow
+the Linux steps inside it.
+
+Open a terminal in this folder.
+
+**Step 1.** Create an environment with SageMath and PyTorch (the big download,
+~once). Run **only one** of these two commands.
+
+With an NVIDIA GPU (Linux):
 
 \`\`\`bash
-# 1. Create an environment with SageMath (this is the big download, ~once)
-conda create -n calt-env -c conda-forge sage python=3.12 -y
-
-# 2. Activate it
-conda activate calt-env
-
-# 3. Install the CALT engine and helpers
-pip install ${CALT_REQUIREMENT} matplotlib click
+${CONDA_CREATE_GPU}
 \`\`\`
+
+Without an NVIDIA GPU, or on a Mac:
+
+\`\`\`bash
+${CONDA_CREATE_CPU}
+\`\`\`
+
+The GPU command needs an NVIDIA driver that \`nvidia-smi\` shows as "CUDA Version"
+12.0 or higher (driver 525 or newer). With an older driver it stops with an
+error; update the driver, or use the command without a GPU.
+
+> **Older NVIDIA GPU** (Maxwell, Pascal or Volta, e.g. GTX 9xx/10xx, P100, V100)? With a recent
+> driver, conda picks a CUDA 13 build that no longer supports these GPUs. Put
+> \`CONDA_OVERRIDE_CUDA=12.9\` in front of the GPU command:
+> \`CONDA_OVERRIDE_CUDA=12.9 ${CONDA_CREATE_GPU}\`
+
+> **GPU, but conda cannot see it?** On a cluster login node without a GPU, or on
+> a machine where \`nvidia-smi\` does not work, the GPU command stops with an
+> error that mentions \`__cuda\`, instead of quietly installing a CPU-only PyTorch.
+> Put \`CONDA_OVERRIDE_CUDA=<version>\` in front of it, where \`<version>\` is the
+> "CUDA Version" that \`nvidia-smi\` prints on the GPU machine (for example
+> \`CONDA_OVERRIDE_CUDA=12.9\`; use \`12.9\` for Maxwell, Pascal or Volta GPUs, regardless of
+> what it prints).
+
+If step 1 stopped with an error, fix that first: steps 2–3 need the environment.
+
+**Steps 2–3.** Activate it, then install the CALT engine and helpers:
+
+\`\`\`bash
+${ACTIVATE_AND_PIP}
+\`\`\`
+
+> **Do not install PyTorch with pip** in this environment (no \`pip install torch\`,
+> no \`pip install -U torch\`). On many Linux systems, including Ubuntu 22.04, pip's
+> GPU build of PyTorch makes \`import calt\` fail with
+> \`\`version \`CXXABI_1.3.15' not found\`\`. If that happens, delete the environment
+> (\`conda deactivate\`, then \`conda env remove -n calt-env -y\`) and repeat steps 1–3.
 
 > **Note**: install exactly \`${CALT_REQUIREMENT}\`, the version this project was
 > tested with. pip also installs the newest \`transformers\`, and calt-x 1.5.0 or
 > earlier stops as soon as training starts with
 > \`AttributeError: 'TrainingArguments' object has no attribute 'warmup_ratio'\`.
-> If you see that error, run \`pip install ${CALT_REQUIREMENT}\` in \`calt-env\`.
+> If you see that error, run \`${PIP_INSTALL}\` in \`calt-env\`.
 
 Check it worked:
 
 \`\`\`bash
-python -c "import calt, sage.all; print('CALT + SageMath OK')"
+${CHECK_COMMAND}
 \`\`\`
+
+It prints \`OK\`, the PyTorch version, its CUDA version and whether the GPU can be
+used. With an NVIDIA GPU you should see a CUDA version (such as \`CUDA 12.9\`) and
+\`GPU True\`.
+
+- **\`CUDA None\` on a GPU machine**: this PyTorch is a CPU-only build. Delete the
+  environment and repeat steps 1–3 with the GPU command.
+- **A CUDA version but \`GPU False\`**: PyTorch has GPU support but cannot reach the
+  GPU right now. Run the check on the machine that has the GPU (not a login
+  node), and make sure \`nvidia-smi\` works there.
+- **\`CUDA 13.x\` on a Maxwell, Pascal or Volta GPU**: this build cannot run on your GPU
+  (training would stop with "no kernel image is available"). Recreate the
+  environment with \`CONDA_OVERRIDE_CUDA=12.9\` (see step 1).
+- **Without an NVIDIA GPU, or on a Mac**: \`CUDA None\` and \`GPU False\` are
+  expected; training runs on the CPU.
 ${sageNote}
 > **Every time** you open a new terminal to use this project, first run:
 > \`conda activate calt-env\`
+
+### Messages you may see
+
+- \`use_return_dict\` is deprecated: a harmless warning from \`transformers\`.
+  Training is not affected.
+- CALT may warn that **an NVIDIA GPU is present but training runs on the CPU**.
+  Do not run the \`pip install\` command it suggests: in this environment it
+  would break \`import calt\`. Run the check above and follow the matching case.
 
 ## 2. Run a task
 
@@ -83,14 +161,18 @@ Each task runs in three steps. From this project folder, go into the task's
 \`\`\`bash
 conda activate calt-env
 cd ${first}/experiments/toy/scripts
-python generate.py    # 1. create the training examples
-python train.py       # 2. train the model (add --dryrun for a quick test)
-python evaluate.py    # 3. see how often it gets the answer right
+python generate.py
+python train.py
+python evaluate.py
 \`\`\`
+
+1. \`generate.py\` creates the training examples.
+2. \`train.py\` trains the model.
+3. \`evaluate.py\` shows how often it gets the answer right.
 
 Start with \`python train.py --dryrun\`: it trains for just a moment so you can
 confirm the whole pipeline works end to end before launching a real run.
-
+${wandbNote}
 ## What is inside
 
 - \`<task>/core/\` : how the examples are made and how answers are scored.

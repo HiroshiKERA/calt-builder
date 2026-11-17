@@ -144,10 +144,16 @@ export function projectFileMap(spec: ProjectSpec): Record<string, string> {
       ...(custom ? [customFolderName(custom.taskName)] : []),
     ];
     const sageTasks = spec.selectedTasks.filter((id) => getTaskMeta(id)?.needsSage);
+    // Same per-task settings applySettings used above, plus the custom task's own.
+    const useWandb =
+      spec.selectedTasks.some(
+        (id) => TASK_FILES[id] && { ...spec.settings, ...spec.perTaskSettings?.[id] }.useWandb,
+      ) || !!custom?.useWandb;
     map[prefix + "README.md"] = buildProjectReadme({
       projectName: spec.projectName || "My CALT project",
       taskFolders,
       sageTasks,
+      useWandb,
     });
   }
   return map;

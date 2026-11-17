@@ -7,16 +7,22 @@ for the full architecture and the multi-repo picture.
 ## What the download is made of
 
 1. **The engine `calt-x`** is not in the ZIP. The user installs it with conda:
-   create a `calt-env` environment (SageMath from conda-forge) then
-   `pip install calt-x==1.6.0 matplotlib click`
-   (omegaconf ships with calt-x, so it is not listed here).
+   create a `calt-env` environment with SageMath **and PyTorch** from
+   conda-forge (`"pytorch>=2.6=cuda*"` with an NVIDIA GPU, `"pytorch>=2.6"`
+   without one), then `pip install calt-x==1.6.1 matplotlib click`
+   (omegaconf ships with calt-x, so it is not listed here). The commands live
+   in `src/lib/caltVersion.ts`.
+   PyTorch must not come from pip: PyPI's CUDA torch makes `import calt` fail
+   with `CXXABI_1.3.15 not found` on Ubuntu 22.04 and other systems older than
+   GCC 14 (its cuDNN loads the system libstdc++; details in caltVersion.ts).
    The bundled tasks import `calt.io.preprocess`. The generated `README.md` walks
    the user through it. 1.4.0 added the monomial embedding (`model_type: monomial`);
    1.5.0 added the decoder-only model (`model_type: decoder_only`) and the
    embedding normalization fix; 1.6.0 is the first release that trains on
-   transformers 5.15 or later. calt-x leaves transformers unbounded, so a fresh
-   install resolves the newest one, and 1.5.0 and earlier crash at training
-   start on it: do not pin lower.
+   transformers 5.15 or later; 1.6.1 keeps `--dryrun` off W&B, makes `cosine`
+   really cosine and caps generation at the positional capacity. calt-x leaves
+   transformers unbounded, so a fresh install resolves the newest one, and
+   1.5.0 and earlier crash at training start on it: do not pin lower.
 
 2. **The task files** (generators, configs, `shared/`, scripts) are a frozen
    snapshot in `src/generated/projectFiles.ts`, regenerated from the **vendored
@@ -76,7 +82,7 @@ patches `experiments/toy/configs/{data,train}.yaml` by key name
 
 ## Bumping the calt-x version
 
-The engine is pinned to `calt-x==1.6.0` (PyPI). The version is defined by
+The engine is pinned to `calt-x==1.6.1` (PyPI). The version is defined by
 `CALT_VERSION` in `src/lib/caltVersion.ts`; `npm run build` refuses to build if
 `project-files/pyproject.toml` or the bundle disagrees with it.
 
@@ -84,10 +90,21 @@ The engine is pinned to `calt-x==1.6.0` (PyPI). The version is defined by
    config changes: renamed or removed keys in `train.yaml` / `lexer.yaml`, new
    validation, new or renamed `model_type` values, changed `requires-python`.
 2. Test a task end to end against the new version in a **fresh** environment
-   (`pip show calt-x transformers torch`). A fresh env matters: calt-x leaves
-   transformers and torch unbounded, so an old env hides what new users get.
+   built with the commands copied from a generated README. A fresh env matters:
+   calt-x leaves transformers and torch unbounded, so an old env hides what new
+   users get. In that env, check that pip keeps conda's PyTorch:
+   - `pip install --dry-run calt-x==<new> matplotlib click` would not install torch;
+   - `pip list` shows no `nvidia-*` packages;
+   - `conda list` shows `pytorch` (and, on GPU builds, `triton`) from conda-forge;
+   - `pip show calt-x transformers` for the record.
+   If calt-x raises its own `torch>=` floor, raise `TORCH_FLOOR` in
+   `caltVersion.ts` to match (and the two commands quoted in README.md). If
+   calt-x, transformers or accelerate starts requiring a newer torch than
+   conda-forge has, pip installs PyPI's torch and `import calt` breaks again
+   (see caltVersion.ts). Then wait for conda-forge, or pin the dependency that
+   raised the floor.
 3. Edit `CALT_VERSION` in `src/lib/caltVersion.ts`. `projectReadme.ts` and
-   `StepReview.tsx` read the constant.
+   `StepReview.tsx` read it and the install commands built from it.
 4. Update the pin (and `requires-python`, if the engine's changed) in
    `project-files/pyproject.toml`, then `npm run bundle`. Both are required:
    `npm run build` fails until the bundle's `pyproject.toml` and
@@ -109,6 +126,31 @@ The engine is pinned to `calt-x==1.6.0` (PyPI). The version is defined by
    option is disabled, saved sessions and the ZIP fall back to `generic`.
    `monomial` stays there until the site can pick a C/E lexer for a task and
    write `model.num_variables` (groebner_basis already ships `lexer_expanded.yaml`).
+
+### Notes for calt 1.7.0
+
+From the calt-x maintainers' handoff (2026-11-17). Nothing is released yet;
+check the release notes before bumping.
+
+- **Lexer change (calt PR #73).** With `attach_sign: false` and
+  `digit_group >= 1`, numbers are split every `digit_group` digits from the
+  left, whatever the vocabulary has. On 1.6.1 multi-digit vocabulary tokens won.
+  - The "Start from scratch", "Greatest common divisor" and "Prime
+    factorization" templates in `src/lib/templates.ts` use `attach_sign: false`,
+    `digit_group: 1` and a multi-digit vocabulary, so on 1.7.0 every number is
+    split into single digits and the multi-digit entries go unused. Decide
+    before bumping: digits (shrink the vocabulary to the digits) or whole
+    numbers (`digit_group: 0`).
+  - Users can pick the same combination in the custom lexer editor
+    (`codegen.ts`, `lexerYaml`), so the custom README may need a note.
+  - The integer_factorization preset (`digit_group: 3`, vocabulary 0..1000)
+    tokenizes its toy data the same way; `1000` would become `100`, `0`. The
+    other presets use `attach_sign: true` and are unaffected.
+  - `PRETOK_VERSION` becomes `v2`, so groebner_basis's pre-tokenized caches
+    are rebuilt on the next `preprocess.py` run.
+- **GPU warning in conda envs (calt PR #75).** calt's "GPU present but training
+  on the CPU" warning will suggest conda commands inside a conda env. Then
+  revisit the generated README's advice not to follow the pip command it prints.
 
 Work on a branch cut from `main` (one per pull request), not on `main` itself:
 every push to `main` deploys the site. Pull requests into `main` run the same
