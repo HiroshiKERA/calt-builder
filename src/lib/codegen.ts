@@ -513,7 +513,7 @@ python evaluate.py
 function readmeMd(cfg: BuildConfig, snake: string): string {
   const t = getTemplate(cfg.templateId);
   const deps = t.extraDeps && t.extraDeps.length
-    ? `\n> **Extra dependency**: this task needs \`${t.extraDeps.join("`, `")}\` (\`pip install ${t.extraDeps.join(" ")}\`).\n`
+    ? `\n> **Extra dependency**: this task needs \`${t.extraDeps.join("`, `")}\`. The conda environment from the project README already has it; elsewhere, \`pip install ${t.extraDeps.join(" ")}\`.\n`
     : "";
   const sageNote = t.requiresSage
     ? `\n> **Note**: this task computes its answers with SageMath, so it must run inside a SageMath-enabled environment.\n`

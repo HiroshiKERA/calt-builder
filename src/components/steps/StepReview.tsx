@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CALT_REQUIREMENT } from "../../lib/caltVersion";
+import { ACTIVATE_AND_PIP, CONDA_CREATE_CPU, CONDA_CREATE_GPU } from "../../lib/caltVersion";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Boxes, Check, Download, FolderTree, HelpCircle, PackageOpen, Terminal } from "lucide-react";
 import { useWizard, hasSelection, customBuildConfig, customTaskIssue } from "../../state/store";
@@ -184,16 +184,28 @@ export function StepReview() {
             code={`conda activate calt-env\ncd ${proj}/${firstFolder}/experiments/toy/scripts\npython generate.py\npython train.py\npython evaluate.py`}
           />
 
-          {/* The conda + pip setup is install-method-dependent and tentative (it will
-              become a single `conda install calt-x` once published), so keep it
-              tucked away rather than front-and-center. */}
+          {/* One-time setup, kept tucked away: the README has the full steps and
+              the GPU checks. The no-GPU command is a comment so that pasting the
+              whole block cannot run both `conda create` lines (the second would
+              replace the first env), and pip is chained after `conda activate`
+              so it never runs in the base env when `conda create` failed.
+              macOS's zsh runs comment lines as commands unless
+              interactivecomments is set, so the setup* strings avoid ( ) ? *
+              and pasting them only prints a harmless "command not found". */}
           <div className="mt-3">
             <Disclosure title={t.review.setupLabel}>
               <CodeBlock
                 language="bash"
                 filename="terminal"
-                maxHeight="160px"
-                code={`# One-time setup with conda (details in README.md)\nconda create -n calt-env -c conda-forge sage python=3.12 -y\nconda activate calt-env\npip install ${CALT_REQUIREMENT} matplotlib click`}
+                maxHeight="220px"
+                code={[
+                  `# ${t.review.setupIntro}`,
+                  `# ${t.review.setupGpu}`,
+                  CONDA_CREATE_GPU,
+                  `# ${t.review.setupCpu}`,
+                  `# ${CONDA_CREATE_CPU}`,
+                  ACTIVATE_AND_PIP,
+                ].join("\n")}
               />
             </Disclosure>
           </div>

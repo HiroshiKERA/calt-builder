@@ -53,8 +53,9 @@ const KEYWORDS = new Set(
 /**
  * Top-level modules in calt-env: everything a fresh `pip install calt-x matplotlib
  * click` brings in (listed from a clean Python 3.12 env), everything the README's
- * `conda create -c conda-forge sage python=3.12` env contains (listed from a real
- * one), and a few common extras. Packages a user installs later can still clash; the generated
+ * `conda create ... sage python=3.12` env contains (listed from real ones, the
+ * last with conda-forge's pytorch, 2026-11-17), and a few common extras.
+ * Packages a user installs later can still clash; the generated
  * scripts then stop with a message that names the clash (see codegen.ts).
  */
 const PACKAGES = new Set(
@@ -88,6 +89,8 @@ const PACKAGES = new Set(
   typing_utils tzdata tzlocal unicodedata2 uri_template urllib3 uvicorn verspec wandb watchdog
   wcwidth webcolors webencodings websocket wheel widgetsnbextension xxhash yaml yaml_env_tag zipp
   zmq zstandard
+  fonttools iniconfig jupyter_builder lark nest_asyncio2 optree pluggy py pybind11 pytest
+  rfc3987_syntax scikit_build_core
   `.split(/\s+/).filter(Boolean),
 );
 

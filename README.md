@@ -34,16 +34,46 @@ Transformer models on algebraic tasks. This app is the friendly front door to it
 4. **Finish.** Choose *Full project* or *Tasks only*, peek inside, and download the
    ZIP. A copy-paste run guide (conda install + 3 commands) is included.
 
-The downloaded project installs the engine with **conda** (SageMath) + `pip`. The
-engine `calt-x==1.6.0` (PyPI) includes the `calt.io.preprocess` the tasks need
-and is the first release that trains on transformers 5.15 or later, which a fresh
-`pip` install resolves.
+The downloaded project installs SageMath and PyTorch with **conda** (conda-forge),
+then the engine `calt-x==1.6.1` with `pip`. calt-x 1.6.1 includes the
+`calt.io.preprocess` the tasks need, trains on transformers 5.15 or later (which a
+fresh `pip` install resolves), keeps `--dryrun` off W&B and really runs the
+`cosine` schedule.
 
-> **Downloaded a project before this fix?** Projects pinned to `calt-x==1.5.0`
-> stop at training start with `AttributeError: 'TrainingArguments' object has no
-> attribute 'warmup_ratio'` on a fresh install. Run `pip install calt-x==1.6.0`
-> inside `calt-env`. If you install from the project's `pyproject.toml` (e.g. with
-> uv), also change its `calt-x==1.5.0` line to `calt-x==1.6.0`.
+> **Downloaded a project whose README's `conda create` line has no `pytorch`** (or
+> that pins `calt-x==1.6.0` or older)? Two kinds of problems can show up:
+>
+> - **Install problems** (caused by pip's PyTorch, not by calt): on Ubuntu 22.04
+>   and other Linux systems older than GCC 14, `import calt` fails with
+>   ``version `CXXABI_1.3.15' not found``; with recent PyTorch and an NVIDIA
+>   driver older than 580, training silently runs on the CPU.
+> - **calt 1.6.0 problems**: `python train.py --dryrun` logs to W&B when the task
+>   has progress logging on, and `lr_scheduler_type: cosine` runs as linear.
+>   (Projects pinned to `calt-x==1.5.0` also stop at training start with
+>   `AttributeError: 'TrainingArguments' object has no attribute 'warmup_ratio'`.)
+>
+> Installing a newer calt-x into the old environment does **not** fix the
+> `CXXABI` error. Recreate the environment instead:
+>
+> ```bash
+> conda deactivate
+> conda env remove -n calt-env -y
+> # with an NVIDIA GPU, on Linux:
+> conda create -n calt-env --override-channels -c conda-forge sage python=3.12 "pytorch>=2.6=cuda*" -y
+> # or, without an NVIDIA GPU or on a Mac, instead of the line above:
+> #   conda create -n calt-env --override-channels -c conda-forge sage python=3.12 "pytorch>=2.6" -y
+> conda activate calt-env && pip install calt-x==1.6.1 matplotlib click
+> ```
+>
+> The GPU line needs NVIDIA driver 525 or newer. Older NVIDIA GPUs (Maxwell,
+> Pascal, Volta) and cluster login nodes need
+> `CONDA_OVERRIDE_CUDA` in front of `conda create`; a newly downloaded project's
+> README explains when. If you install from the project's `pyproject.toml` (e.g. with uv), also change
+> its `calt-x==` line to `calt-x==1.6.1`. After the update, `cosine` really is a
+> cosine schedule, so the same config gives a different training curve than
+> before. If you trained with `lexer_expanded.yaml` (groebner_basis), the text
+> form of the zero polynomial changed (calt #64): delete the
+> `data/processed_*` caches and retrain models trained on the old form.
 
 ## Run locally
 
@@ -80,7 +110,7 @@ Then review the diff in `src/generated/projectFiles.ts`, test a task, and commit
 re-vendors `task-sources/` from that remote, then bundles.)
 
 The engine version is defined in `src/lib/caltVersion.ts` (currently
-`calt-x==1.6.0` from PyPI). See **[MAINTAINING.md](MAINTAINING.md)** for how to bump it.
+`calt-x==1.6.1` from PyPI). See **[MAINTAINING.md](MAINTAINING.md)** for how to bump it.
 
 See [MAINTAINING.md](MAINTAINING.md) for the full maintenance workflow and
 [AI_CONTEXT.md](AI_CONTEXT.md) for a deep architectural description.

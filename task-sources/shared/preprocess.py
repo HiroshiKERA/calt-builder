@@ -11,13 +11,9 @@ imports that already write `from shared.preprocess import ...`. New code should
 import from `calt.io.preprocess` directly (or from `shared.calt_adapter`, which
 shims both the new and old module locations).
 
-If you ever `pip install --upgrade calt-x` and the `calt/preprocess.py` file
-disappears from site-packages, restore it from this project's backup:
-
-    /data/t-maxime/backups/calt-sitepackages_before-preprocess_20260526.tar.gz
-
-or copy the previous version of this file (see git history) which contained
-the full implementation inline.
+The calt-x version pinned in this project's pyproject.toml provides
+`calt.io.preprocess`. If the import below fails, reinstall that exact version
+(`pip install calt-x==<version in pyproject.toml>`) rather than upgrading.
 """
 
 try:  # new calt-x: module relocated under calt.io
