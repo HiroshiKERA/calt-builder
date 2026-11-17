@@ -7,7 +7,12 @@ model:
   d_model: 128
   encoder_ffn_dim: 512
   decoder_ffn_dim: 512
-  max_sequence_length: 256
+  # Must cover the longest problem and answer in tokens (incl. BOS/EOS).
+  # Measured answers reach 327 at 100k samples and 345 at 1M (an empirical
+  # bound; the worst case is higher). BART uses this value as its exact
+  # positional limit (generic and decoder_only allocate twice it), and 256
+  # made BART stop mid-training with "index out of range".
+  max_sequence_length: 512
   use_positional_embedding: learned
 
 train:
