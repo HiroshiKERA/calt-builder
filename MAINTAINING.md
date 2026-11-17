@@ -66,7 +66,8 @@ So pointing it at an incomplete source (e.g. calt-codebase `main`) aborts loudly
 instead of silently dropping tasks.
 
 If upstream renamed YAML keys, re-check `applySettings` in `src/lib/zip.ts` — it
-patches `experiments/toy/configs/{data,train}.yaml` by key name
+patches `experiments/toy/configs/{data,train}.yaml` by key name (and `no_wandb`
+in every `experiments/*/configs/train*.yaml`)
 (`num_train_samples`, `num_test_samples`, model dims, `num_train_epochs`,
 `use_positional_embedding`, `no_wandb`); a rename makes it silently no-op.
 

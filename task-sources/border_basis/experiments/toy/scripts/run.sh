@@ -13,8 +13,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 PY="${PYTHON:-python}"
-if ! "$PY" -c "import calt, sage" >/dev/null 2>&1; then
-    echo "❌ Wrong Python environment: \`$PY\` cannot import \`calt\` or \`sage\`." >&2
+if ! IMPORT_ERR="$("$PY" -c "import calt, sage" 2>&1)"; then
+    echo "❌ \`$PY\` cannot import \`calt\` and \`sage\`:" >&2
+    echo "   $(printf '%s\n' "$IMPORT_ERR" | tail -n 1)" >&2
+    if printf '%s\n' "$IMPORT_ERR" | grep -q CXXABI; then
+        echo "   This is the CXXABI error from pip's PyTorch in a conda env. Recreate calt-env" >&2
+        echo "   with PyTorch from conda-forge (no pip torch), as the project README.md says:" >&2
+        echo "     conda deactivate; conda env remove -n calt-env -y" >&2
+        echo "     conda create -n calt-env --override-channels -c conda-forge sage python=3.12 \"pytorch>=2.6=cuda*\" -y" >&2
+        echo "     (no NVIDIA GPU / Mac: \"pytorch>=2.6\" instead), then:" >&2
+        echo "     conda activate calt-env && pip install calt-x==<version in pyproject.toml> matplotlib click" >&2
+        exit 1
+    fi
     echo "   Run:  conda activate calt-env   (or set PYTHON=/path/to/calt-env/bin/python)" >&2
     exit 1
 fi
