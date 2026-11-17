@@ -46,12 +46,19 @@ function setYamlStr(content: string, key: string, value: string): string {
   return content.replace(new RegExp(`^(\\s*${key}:\\s*)\\S+`, "m"), `$1${value}`);
 }
 
+/** Every training config a task ships: toy/train.yaml, toy/train_encoder_only.yaml, scaling/, ablation/, ... */
+const TRAIN_CONFIG_RE = /\/experiments\/[^/]+\/configs\/train[^/]*\.yaml$/;
+
 /**
  * Apply the project-wide settings to an example task's toy config files.
  * Only touches experiments/toy/configs so other experiments keep their own
- * committed settings. Missing keys are left untouched (regex simply no-ops).
+ * committed settings, with one exception: progress logging (`no_wandb`) is
+ * set in every training config the task ships, so turning W&B off never
+ * leaves a scaling/ablation config (or parity's train_encoder_only.yaml) that
+ * still logs. Missing keys are left untouched (regex simply no-ops).
  */
 function applySettings(path: string, content: string, s: ProjectSettings): string {
+  if (TRAIN_CONFIG_RE.test(path)) content = setYamlBool(content, "no_wandb", !s.useWandb);
   if (path.endsWith("experiments/toy/configs/data.yaml")) {
     content = setYamlInt(content, "num_train_samples", s.numTrain);
     content = setYamlInt(content, "num_test_samples", s.numTest);
@@ -67,7 +74,6 @@ function applySettings(path: string, content: string, s: ProjectSettings): strin
     content = setYamlInt(content, "num_train_epochs", s.epochs);
     content = setYamlStr(content, "use_positional_embedding", s.posEmbedding);
     content = setYamlStr(content, "model_type", shippableModelType(s.modelType));
-    content = setYamlBool(content, "no_wandb", !s.useWandb);
   }
   return content;
 }

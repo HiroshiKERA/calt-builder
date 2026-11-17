@@ -17,27 +17,48 @@
 #   4. python evaluate.py --training_order <order>   # print the success rate and examples
 
 set -e
+ORIGINAL_ARGS="$*"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # ------------- Preflight: check the right Python is on PATH --------------
 # We need calt-x AND sage installed. If `python -c 'import calt, sage'` fails,
-# the user is on the wrong env (typical: base conda instead of calt-env).
+# the user is usually on the wrong env (typical: base conda instead of
+# calt-env), or calt-env has pip's PyTorch in it (CXXABI error).
 PY="${PYTHON:-python}"
-if ! "$PY" -c "import calt, sage" >/dev/null 2>&1; then
-    echo "❌ Wrong Python environment: \`$PY\` cannot import \`calt\` or \`sage\`." >&2
+if ! IMPORT_ERR="$("$PY" -c "import calt, sage" 2>&1)"; then
+    echo "❌ \`$PY\` cannot import \`calt\` and \`sage\`:" >&2
+    echo "   $(printf '%s\n' "$IMPORT_ERR" | tail -n 1)" >&2
+    if printf '%s\n' "$IMPORT_ERR" | grep -q CXXABI; then
+        echo "   This is the CXXABI error from pip's PyTorch in a conda env. Recreate calt-env" >&2
+        echo "   with PyTorch from conda-forge (no pip torch), as the project README.md says:" >&2
+        echo "     conda deactivate; conda env remove -n calt-env -y" >&2
+        echo "     conda create -n calt-env --override-channels -c conda-forge sage python=3.12 \"pytorch>=2.6=cuda*\" -y" >&2
+        echo "     (no NVIDIA GPU / Mac: \"pytorch>=2.6\" instead), then:" >&2
+        echo "     conda activate calt-env && pip install calt-x==<version in pyproject.toml> matplotlib click" >&2
+        exit 1
+    fi
     echo "   Fix one of these:" >&2
     echo "     1. Activate the conda env:  conda activate calt-env" >&2
     echo "     2. Or set PYTHON explicitly: PYTHON=/path/to/calt-env/bin/python bash run.sh" >&2
     echo "" >&2
-    echo "   Looking for ANY env that has calt installed..." >&2
-    for cand in /home/t-maxime/miniconda3/envs/*/bin/python /opt/conda/envs/*/bin/python; do
-        if [[ -x "$cand" ]] && "$cand" -c "import calt" >/dev/null 2>&1; then
+    echo "   Looking for a conda env that has calt installed..." >&2
+    CONDA_ROOT=""
+    if [[ -n "${CONDA_EXE:-}" ]]; then CONDA_ROOT="$(dirname "$(dirname "$CONDA_EXE")")"; fi
+    FOUND=""
+    for cand in ${CONDA_ROOT:+"$CONDA_ROOT"/envs/*/bin/python} \
+                ${MAMBA_ROOT_PREFIX:+"$MAMBA_ROOT_PREFIX"/envs/*/bin/python} \
+                "$HOME"/miniforge3/envs/*/bin/python "$HOME"/mambaforge/envs/*/bin/python \
+                "$HOME"/miniconda3/envs/*/bin/python "$HOME"/anaconda3/envs/*/bin/python \
+                "$HOME"/.conda/envs/*/bin/python /opt/conda/envs/*/bin/python; do
+        if [[ -x "$cand" ]] && "$cand" -c "import calt, sage" >/dev/null 2>&1; then
+            FOUND="$cand"
             echo "   Found: $cand" >&2
-            echo "     → re-run with: PYTHON=$cand bash run.sh ${ORIGINAL_ARGS:-}" >&2
+            echo "     → re-run with: PYTHON=$(printf '%q' "$cand") bash run.sh ${ORIGINAL_ARGS:-}" >&2
             break
         fi
     done
+    [[ -n "$FOUND" ]] || echo "   (none found)" >&2
     exit 1
 fi
 # From here on, all python invocations use $PY.

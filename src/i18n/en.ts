@@ -330,7 +330,7 @@ export const en = {
     title: "Settings",
     subtitle: "Fine-tune each task's training settings. The defaults already work well.",
     appliesNote:
-      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of training examples, train.yaml for the model size, position embedding, architecture, training rounds and logging, and lexer.yaml for the tokenizer vocabulary.",
+      "These are saved into each task's config when you download. To change them later, edit the files in experiments/toy/configs/ inside the task folder: data.yaml for the number of training examples, train.yaml for the model size, position embedding, architecture, training rounds and logging, and lexer.yaml for the tokenizer vocabulary. The logging choice is also written into the task's other experiment configs.",
     noTasks: "No tasks selected yet. Go back and pick at least one.",
     continueLabel: "Continue",
     previewLegend: "This is what your settings write into the task's config files. Highlighted lines are the ones the controls edit; a line flashes when it changes.",

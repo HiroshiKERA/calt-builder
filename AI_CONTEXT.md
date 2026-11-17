@@ -127,7 +127,10 @@ needsSage; names, summaries and taglines come from i18n (`tasks.items[id]`).
 `applySettings` patches `experiments/toy/configs/`:
 - `data.yaml`: `num_train_samples`, `num_test_samples`.
 - `train.yaml`: model block (`MODEL_PRESETS`), `num_train_epochs`,
-  **`use_positional_embedding`** (string, via `setYamlStr`), and `no_wandb`.
+  **`use_positional_embedding`** (string, via `setYamlStr`), and `model_type`.
+- `no_wandb` is the exception: it is set in **every** `experiments/*/configs/train*.yaml`
+  of the task (toy, scaling, ablation, finite_field, parity's
+  `train_encoder_only.yaml`), so the W&B toggle covers the whole project.
 
 **ConfigPreview** (`src/components/ConfigPreview.tsx`) reuses `projectFileMap` for a
 single task to show the **real** generated `train.yaml`/`data.yaml`/`lexer.yaml` in
