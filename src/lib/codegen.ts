@@ -137,7 +137,9 @@ Input  : ${t.exampleInput}
 Output : ${t.exampleOutput}
 
 Contract: __call__(seed) is deterministic and returns (problem, answer) as
-strings. The DatasetPipeline calls it for seeds 0..N-1 and writes one
+strings. The DatasetPipeline calls it once per sample, with a large integer
+seed derived from root_seed (it can exceed 2**32: use random.seed(seed) or
+np.random.default_rng(seed), not np.random.seed(seed)), and writes one
 "input # output" line per sample.
 """
 

@@ -307,7 +307,7 @@ export const en = {
     numMax: "Largest number",
     digitGroup: "How numbers become tokens",
     digitGroupHint:
-      "Whole = one token per number. 1 / 2 / 3 = split numbers into digit groups, so large numbers reuse a tiny vocabulary.",
+      "Whole = one token per number. 1 / 2 / 3 = split numbers into digit groups, so large numbers reuse a tiny vocabulary. Spaces are not tokens, so with digit groups (calt 1.7 and later) the boundary between space-separated numbers is lost (“48 36” reads like “4 8 3 6”).",
     whole: "Whole",
     attachSign: "Attach sign to numbers",
     allowFloat: "Allow decimals (e.g. 0.71)",
@@ -318,7 +318,7 @@ export const en = {
     numMaxInfo:
       "The largest whole number your data can contain. Together with the smallest, this sets the range of number tokens the model knows.",
     digitGroupInfo:
-      "“Whole” gives each number its own token: simple, but it needs a large vocabulary. Splitting into 1, 2 or 3-digit groups lets big numbers reuse a tiny vocabulary, at the cost of longer sequences.",
+      "“Whole” gives each number its own token: simple, but every number in your data must be inside the range above. Splitting into 1, 2 or 3-digit groups lets big numbers reuse a tiny vocabulary, at the cost of longer sequences. Spaces are not tokens, so with digit groups (calt 1.7 and later) “48 36” and “4 836” become the same tokens; use “Whole” when your problems or answers list several numbers separated by spaces.",
     attachSignInfo:
       "On: a leading minus is part of the number, so “-5” is a single token (for signed values). Off: “-” is treated as a separate symbol, like a subtraction sign.",
     allowFloatInfo:

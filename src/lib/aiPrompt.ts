@@ -40,7 +40,10 @@ Write ONE Python class named "${className}" that follows these rules EXACTLY:
 2. __call__(self, seed: int) -> tuple[str, str]: return a (problem, answer) pair.
 3. It MUST be deterministic. Call random.seed(seed) at the very start of __call__
    (and seed any other random source you use), so the same seed always returns
-   the same pair.
+   the same pair. The seed can be a very large integer (larger than 2**32), so
+   for NumPy use rng = np.random.default_rng(seed) and draw from rng; do NOT
+   call np.random.seed(seed), which rejects such seeds. For any other library
+   that needs a small seed, pass seed % 2**32.
 4. "problem" and "answer" must both be plain strings:
    - separate numbers or items with single spaces, e.g. "3 7 11";
    - if one side is a list, join the items with " | ";

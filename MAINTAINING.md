@@ -146,14 +146,16 @@ check the release notes before bumping.
 - **Lexer change (calt PR #73).** With `attach_sign: false` and
   `digit_group >= 1`, numbers are split every `digit_group` digits from the
   left, whatever the vocabulary has. On 1.6.1 multi-digit vocabulary tokens won.
-  - The "Start from scratch", "Greatest common divisor" and "Prime
-    factorization" templates in `src/lib/templates.ts` use `attach_sign: false`,
-    `digit_group: 1` and a multi-digit vocabulary, so on 1.7.0 every number is
-    split into single digits and the multi-digit entries go unused. Decide
-    before bumping: digits (shrink the vocabulary to the digits) or whole
-    numbers (`digit_group: 0`).
-  - Users can pick the same combination in the custom lexer editor
-    (`codegen.ts`, `lexerYaml`), so the custom README may need a note.
+  - Done ahead of 1.7.0: the "Start from scratch", "Greatest common divisor"
+    and "Prime factorization" templates in `src/lib/templates.ts` now default
+    to whole numbers (`digit_group: 0`), so they tokenize the same way on 1.6.1
+    and 1.7.0. Why: the lexer does not emit a token for spaces, so with digit
+    groups space-separated numbers run together ("48 36" -> `4 8 3 6`, the same
+    as "4 836"). Measured on calt dev, 10k samples, 30 epochs: GCD 93.8% with
+    `digit_group: 1` vs 99.3% whole; prime factorization 99.5% vs 100%.
+  - Users can still pick digit groups in the tokenizer editor (`codegen.ts`,
+    `lexerYaml`); the editor's hint (en/ja `digitGroupHint`/`digitGroupInfo`)
+    warns about the lost boundaries.
   - The integer_factorization preset (`digit_group: 3`, vocabulary 0..1000)
     tokenizes its toy data the same way; `1000` would become `100`, `0`. The
     other presets use `attach_sign: true` and are unaffected.
