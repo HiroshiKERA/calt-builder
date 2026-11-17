@@ -105,6 +105,9 @@ class ${cls}:
 
     The generator must be deterministic: the same seed always yields the same
     (problem, answer) pair. Both 'problem' and 'answer' are strings.
+    Keep every number within the tokenizer's range (-100..100 by default), or
+    widen the range on the tokenizer screen; numbers outside it become unknown
+    tokens.
     """
 
     def __init__(self):
@@ -123,7 +126,9 @@ class ${cls}:
     lexer: () => ({
       numbers: ["", -100, 100],
       misc: ["+", "-", "*", "^", "|", "x", "y"],
-      digitGroup: 1,
+      // Whole numbers: with digit groups, calt >= 1.7.0 splits every number and
+      // space-separated numbers run together ("48 36" -> 4 8 3 6).
+      digitGroup: 0,
       attachSign: false,
       strict: false,
     }),
@@ -163,7 +168,8 @@ class ${cls}:
         return f"{a} {b}", str(math.gcd(a, b))
 `,
     formatterBody: (_v, i, o) => genericFormatter(i, o),
-    lexer: () => ({ numbers: ["", 0, 1000], misc: [], digitGroup: 1, attachSign: false, strict: false }),
+    // Whole numbers: digit groups would merge the two inputs ("48 36" -> 4 8 3 6) on calt >= 1.7.0.
+    lexer: () => ({ numbers: ["", 0, 1000], misc: [], digitGroup: 0, attachSign: false, strict: false }),
     maxSeqLen: 64,
   },
 
@@ -218,7 +224,8 @@ class ${cls}:
         return factors
 `,
     formatterBody: (_v, i, o) => genericFormatter(i, o),
-    lexer: () => ({ numbers: ["", 0, 10000], misc: ["*", "^"], digitGroup: 1, attachSign: false, strict: false }),
+    // Whole numbers, like the other integer templates (the same tokens on calt 1.6 and 1.7).
+    lexer: () => ({ numbers: ["", 0, 10000], misc: ["*", "^"], digitGroup: 0, attachSign: false, strict: false }),
     maxSeqLen: 96,
   },
 
@@ -234,9 +241,7 @@ class ${cls}:
     requiresSage: false,
     extraDeps: ["numpy"],
     params: [],
-    generatorBody: (_v, cls) => `import random
-
-import numpy as np
+    generatorBody: (_v, cls) => `import numpy as np
 
 
 class ${cls}:
@@ -254,9 +259,10 @@ class ${cls}:
         self.decimals = decimals
 
     def __call__(self, seed: int) -> tuple[str, str]:
-        np.random.seed(seed)
+        # calt passes 128-bit seeds; np.random.seed only takes < 2**32, default_rng takes any int.
+        rng = np.random.default_rng(seed)
         pts = np.round(
-            np.random.uniform(-self.scale, self.scale, size=(self.n_points, 2)), self.decimals
+            rng.uniform(-self.scale, self.scale, size=(self.n_points, 2)), self.decimals
         )
         problem = " | ".join(f"{x} {y}" for x, y in pts)
         centered = pts - pts.mean(axis=0)
