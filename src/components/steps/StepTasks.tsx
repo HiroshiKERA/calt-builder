@@ -5,7 +5,7 @@ import { customFolderName, customNameIssue, usesFallbackFolder, type CustomNameI
 import { useT } from "../../i18n";
 import { TASKS } from "../../lib/tasks";
 import { STATS } from "../../lib/stats";
-import { freshGeneratorCode, defaultLexerConfig, type LexerConfig } from "../../lib/codegen";
+import { freshGeneratorCode, defaultLexerConfig, normalizeLexerConfig, type LexerConfig } from "../../lib/codegen";
 import { TEMPLATES, legacyTemplateRename, getTemplate } from "../../lib/templates";
 import { buildAiPrompt, buildMeasureAiPrompt } from "../../lib/aiPrompt";
 import { SectionLabel } from "../ui/Card";
@@ -266,8 +266,10 @@ function Toggle({
 function LexerEditor() {
   const { config, patchCustom } = useWizard();
   const t = useT();
-  const lx: LexerConfig = config.custom.lexer ?? defaultLexerConfig(config.custom.templateId, {});
-  const set = (p: Partial<LexerConfig>) => patchCustom({ lexer: { ...lx, ...p } });
+  // Normalized, so a saved session with a negative lower bound and a separate
+  // sign shows the range that will actually be written.
+  const lx: LexerConfig = normalizeLexerConfig(config.custom.lexer ?? defaultLexerConfig(config.custom.templateId, {}));
+  const set = (p: Partial<LexerConfig>) => patchCustom({ lexer: normalizeLexerConfig({ ...lx, ...p }) });
   const toInt = (s: string, fallback: number) => {
     const n = parseInt(s, 10);
     return Number.isNaN(n) ? fallback : n;
@@ -293,6 +295,7 @@ function LexerEditor() {
           info={<InfoHint title={t.lexer.numMin}><p>{t.lexer.numMinInfo}</p></InfoHint>}
         >
           <TextInput inputMode="numeric" value={String(lx.numbersMin)} onChange={(e) => set({ numbersMin: toInt(e.target.value, lx.numbersMin) })} />
+          {!lx.attachSign && <p className="mt-1 text-xs text-ink-400">{t.lexer.numMinSeparateHint}</p>}
         </Field>
         <Field
           label={t.lexer.numMax}

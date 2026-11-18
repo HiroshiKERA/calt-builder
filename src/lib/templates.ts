@@ -105,9 +105,10 @@ class ${cls}:
 
     The generator must be deterministic: the same seed always yields the same
     (problem, answer) pair. Both 'problem' and 'answer' are strings.
-    Keep every number within the tokenizer's range (-100..100 by default), or
-    widen the range on the tokenizer screen. calt has no unknown token: a number
-    outside the range makes training stop with an error.
+    Keep every number within the tokenizer's range (-100..100 by default: the
+    minus sign is its own token, numbers 0..100), or widen the range on the
+    tokenizer screen. calt has no unknown token: a number outside the range
+    makes training stop with an error.
     """
 
     def __init__(self):
@@ -124,7 +125,10 @@ class ${cls}:
 `,
     formatterBody: (_v, i, o) => genericFormatter(i, o),
     lexer: () => ({
-      numbers: ["", -100, 100],
+      // 0..100 with a separate "-": negatives are "-" followed by a number.
+      // A negative lower bound here would put "-5" etc. in the vocabulary,
+      // which calt matches before the "-" symbol (see normalizeLexerConfig).
+      numbers: ["", 0, 100],
       misc: ["+", "-", "*", "^", "|", "x", "y"],
       // Whole numbers: with digit groups, calt >= 1.7.0 splits every number and
       // space-separated numbers run together ("48 36" -> 4 8 3 6).
