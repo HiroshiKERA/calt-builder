@@ -23,6 +23,16 @@
  *   generation could exceed the model's positional capacity and print
  *   tracebacks (#70). It also warns when an NVIDIA GPU is present but training
  *   runs on the CPU (#68). No API changes; config files need no changes.
+ * - 1.7.0 (pinned, 2026-11-18; same dependencies as 1.6.1, no config keys
+ *   renamed or removed): inside a conda env, when torch is CPU-only or too new
+ *   for the driver, the GPU warning suggests conda-forge commands instead of
+ *   pip ones (calt #75). With
+ *   `attach_sign: false` and `digit_group >= 1`, numbers are split every
+ *   `digit_group` digits whatever the vocabulary holds (#73); the templates
+ *   default to whole numbers (`digit_group: 0`), which tokenize the same way
+ *   on 1.6.1 and 1.7.0, and the integer_factorization preset's data was
+ *   checked to tokenize the same. Pre-tokenized caches move to v2, so
+ *   groebner_basis's `preprocess.py` output from 1.6.x is rebuilt.
  *
  * Earlier floors still apply: 1.5.0 normalizes the token+position sum before
  * the transformer stack (without it coefficient accuracy sits at chance level)
@@ -32,7 +42,7 @@
  * not offer (monomial models need C/E data and model.num_variables; see
  * UNAVAILABLE_MODEL_TYPES in codegen.ts).
  */
-export const CALT_VERSION = "1.6.1";
+export const CALT_VERSION = "1.7.0";
 
 /** `calt-x==<CALT_VERSION>`: the dependency specifier used in pyproject and the README. */
 export const CALT_REQUIREMENT = `calt-x==${CALT_VERSION}`;

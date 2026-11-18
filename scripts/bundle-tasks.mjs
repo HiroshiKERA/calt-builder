@@ -100,7 +100,7 @@ for (const f of ["pyproject.toml"]) {
 }
 
 // ---- Snapshot stamp: records when this bundle was taken and the engine pin ----
-// The calt-x pin lives in pyproject.toml (e.g. `"calt-x==1.6.1",`). Take the
+// The calt-x pin lives in pyproject.toml (e.g. `"calt-x==1.7.0",`). Take the
 // whole specifier from the first non-comment line that has one, so a comment
 // mentioning calt-x (or an older pin) is never reported as the engine.
 const CALT_PIN_RE = /(?<![\w.-])calt-x(\[[^\]]*\])?\s*==\s*[^\s"',;]+/;

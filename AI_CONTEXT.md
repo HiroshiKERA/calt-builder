@@ -41,7 +41,7 @@ What a user downloads is assembled from two sources baked into
 
 3. **The engine `calt-x`** is in neither: the user installs it with conda + pip.
    `conda create` brings SageMath and PyTorch from conda-forge, then
-   `pip install calt-x==1.6.1` (PyPI). PyTorch must not come from pip (see §11). The bundled tasks import `calt.io.preprocess`
+   `pip install calt-x==1.7.0` (PyPI). PyTorch must not come from pip (see §11). The bundled tasks import `calt.io.preprocess`
    (offline pre-tokenization). The version lives in one place,
    `src/lib/caltVersion.ts`; to bump it, see §11.
 
@@ -196,7 +196,7 @@ npm run build
 
 ## 11. Project strategy, decisions, and OPEN loose ends (read this)
 
-- **Install = `calt-x==1.6.1` from PyPI, PyTorch from conda-forge.** The version
+- **Install = `calt-x==1.7.0` from PyPI, PyTorch from conda-forge.** The version
   and the install commands are defined once, in `src/lib/caltVersion.ts`;
   `projectReadme.ts` and `StepReview.tsx` read them, and `projectFileMap` in `zip.ts` rewrites the pin line inside the
   bundled (shared) `pyproject.toml` at download time. `project-files/pyproject.toml`
@@ -219,8 +219,9 @@ npm run build
   matplotlib and sage need, so `import calt` fails. The README therefore puts
   `"pytorch>=2.6=cuda*"` (GPU) or `"pytorch>=2.6"` (no GPU, macOS) in the `conda create`
   line and never pins torch on the pip line. calt adds no in-library
-  workaround. calt 1.6.1's GPU warning still suggests pip commands; the README
-  tells users to ignore them (calt 1.7.0 changes that, see MAINTAINING.md).
+  workaround. Since 1.7.0, calt's GPU warning suggests conda-forge commands
+  inside a conda env when torch is CPU-only or too new for the driver; the README still points users to its own check and to
+  recreating the env (MAINTAINING.md, *Changes in calt 1.7.0*).
 - **Position embedding value = `generic`, label "Learned".** The engine's
   `get_positional_embedding` historically accepted only `generic/sinusoidal/rope/none`
   ("learned" raised). The fix making "learned" an alias is now **on calt `main`**

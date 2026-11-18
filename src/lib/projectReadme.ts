@@ -131,7 +131,10 @@ used. With an NVIDIA GPU you should see a CUDA version (such as \`CUDA 12.9\`) a
   environment and repeat steps 1–3 with the GPU command.
 - **A CUDA version but \`GPU False\`**: PyTorch has GPU support but cannot reach the
   GPU right now. Run the check on the machine that has the GPU (not a login
-  node), and make sure \`nvidia-smi\` works there.
+  node), and make sure \`nvidia-smi\` works there. If the check shows
+  \`CUDA 13.x\` but \`nvidia-smi\` shows a "CUDA Version" below 13.0 (driver
+  older than 580), update the driver or recreate the environment with
+  \`CONDA_OVERRIDE_CUDA=12.9\` (see step 1).
 - **\`CUDA 13.x\` on a Maxwell, Pascal or Volta GPU**: this build cannot run on your GPU
   (training would stop with "no kernel image is available"). Recreate the
   environment with \`CONDA_OVERRIDE_CUDA=12.9\` (see step 1).
@@ -146,8 +149,9 @@ ${sageNote}
 - \`use_return_dict\` is deprecated: a harmless warning from \`transformers\`.
   Training is not affected.
 - CALT may warn that **an NVIDIA GPU is present but training runs on the CPU**.
-  Do not run the \`pip install\` command it suggests: in this environment it
-  would break \`import calt\`. Run the check above and follow the matching case.
+  Run the check above and follow the matching case. If the warning suggests a
+  \`conda install\` command, you can instead recreate the environment with the
+  GPU command of step 1. Never \`pip install torch\` here (see steps 2–3).
 
 ## 2. Run a task
 

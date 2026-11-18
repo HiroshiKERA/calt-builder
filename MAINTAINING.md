@@ -9,7 +9,7 @@ for the full architecture and the multi-repo picture.
 1. **The engine `calt-x`** is not in the ZIP. The user installs it with conda:
    create a `calt-env` environment with SageMath **and PyTorch** from
    conda-forge (`"pytorch>=2.6=cuda*"` with an NVIDIA GPU, `"pytorch>=2.6"`
-   without one), then `pip install calt-x==1.6.1 matplotlib click`
+   without one), then `pip install calt-x==1.7.0 matplotlib click`
    (omegaconf ships with calt-x, so it is not listed here). The commands live
    in `src/lib/caltVersion.ts`.
    PyTorch must not come from pip: PyPI's CUDA torch makes `import calt` fail
@@ -20,7 +20,9 @@ for the full architecture and the multi-repo picture.
    1.5.0 added the decoder-only model (`model_type: decoder_only`) and the
    embedding normalization fix; 1.6.0 is the first release that trains on
    transformers 5.15 or later; 1.6.1 keeps `--dryrun` off W&B, makes `cosine`
-   really cosine and caps generation at the positional capacity. calt-x leaves
+   really cosine and caps generation at the positional capacity; 1.7.0 splits
+   numbers by `digit_group` whatever the vocabulary holds and, inside a conda
+   env, suggests conda commands in its GPU warning. calt-x leaves
    transformers unbounded, so a fresh install resolves the newest one, and
    1.5.0 and earlier crash at training start on it: do not pin lower.
 
@@ -93,7 +95,7 @@ in every `experiments/*/configs/train*.yaml`)
 
 ## Bumping the calt-x version
 
-The engine is pinned to `calt-x==1.6.1` (PyPI). The version is defined by
+The engine is pinned to `calt-x==1.7.0` (PyPI). The version is defined by
 `CALT_VERSION` in `src/lib/caltVersion.ts`; `npm run build` refuses to build if
 `project-files/pyproject.toml` or the bundle disagrees with it.
 
@@ -138,15 +140,15 @@ The engine is pinned to `calt-x==1.6.1` (PyPI). The version is defined by
    `monomial` stays there until the site can pick a C/E lexer for a task and
    write `model.num_variables` (groebner_basis already ships `lexer_expanded.yaml`).
 
-### Notes for calt 1.7.0
+### Changes in calt 1.7.0
 
-From the calt-x maintainers' handoff (2026-11-17). Nothing is released yet;
-check the release notes before bumping.
+Released 2026-11-18 (https://github.com/HiroshiKERA/calt/releases/tag/v1.7.0);
+the site pins it. Same dependencies as 1.6.1, no config keys renamed or removed.
 
 - **Lexer change (calt PR #73).** With `attach_sign: false` and
   `digit_group >= 1`, numbers are split every `digit_group` digits from the
   left, whatever the vocabulary has. On 1.6.1 multi-digit vocabulary tokens won.
-  - Done ahead of 1.7.0: the "Start from scratch", "Greatest common divisor"
+  - Done before the bump: the "Start from scratch", "Greatest common divisor"
     and "Prime factorization" templates in `src/lib/templates.ts` now default
     to whole numbers (`digit_group: 0`), so they tokenize the same way on 1.6.1
     and 1.7.0. Why: the lexer does not emit a token for spaces, so with digit
@@ -157,13 +159,29 @@ check the release notes before bumping.
     `lexerYaml`); the editor's hint (en/ja `digitGroupHint`/`digitGroupInfo`)
     warns about the lost boundaries.
   - The integer_factorization preset (`digit_group: 3`, vocabulary 0..1000)
-    tokenizes its toy data the same way; `1000` would become `100`, `0`. The
-    other presets use `attach_sign: true` and are unaffected.
+    tokenizes its toy data the same way (calt-x checked all 252 numbers its
+    data can contain); `1000` would become `100`, `0`. The other presets use
+    `attach_sign: true` and are unaffected.
+  - In this mode 1.7.0 also reads `.5` as `0 . 5` with `allow_float: true` and
+    no longer takes vocabulary tokens that start with a digit (such as `2x`)
+    whole. No preset or template hits this; a user's tokenizer edits can.
+  - Projects downloaded before 2026-11-18 may have custom tasks with digit
+    groups, so the recovery commands in `README.md` keep `calt-x==1.6.1`.
   - `PRETOK_VERSION` becomes `v2`, so groebner_basis's pre-tokenized caches
     are rebuilt on the next `preprocess.py` run.
-- **GPU warning in conda envs (calt PR #75).** calt's "GPU present but training
-  on the CPU" warning will suggest conda commands inside a conda env. Then
-  revisit the generated README's advice not to follow the pip command it prints.
+- **GPU warning in conda envs (calt PR #75).** When torch is a CPU-only build,
+  or built for CUDA 13 with a driver older than 580, calt's "GPU present but
+  training on the CPU" warning now suggests
+  `conda install -c conda-forge "pytorch>=2.6=cuda*"` (or `cuda12*`) inside a
+  conda env, after `pip uninstall torch` if pip installed torch. When a CUDA
+  build simply cannot reach the GPU, it suggests no command (check
+  `nvidia-smi`, container passthrough). The generated README sends users to its
+  check, whose cases cover all three (`projectReadme.ts`, "Messages you may see").
+- **No `[UNK]` token.** A symbol missing from `lexer.yaml` stops training at the
+  first batch that has it (`WordLevel error: Missing [UNK] token`, since the
+  builder writes `validate_test_tokens: false`). The generated `lexer.yaml`
+  comment and the tokenizer editor's hints say so; calt-x may revisit this
+  after 1.7.0.
 
 Work on a branch cut from `main` (one per pull request), not on `main` itself:
 every push to `main` deploys the site. Pull requests into `main` run the same
