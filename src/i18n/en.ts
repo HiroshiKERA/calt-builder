@@ -305,6 +305,8 @@ export const en = {
     symbolsHint: "Space-separated. Include every operator/letter that appears, e.g. + - * ^ | x y",
     numMin: "Smallest number",
     numMax: "Largest number",
+    numMinSeparateHint:
+      "The sign is a separate symbol, so a negative number becomes “-” followed by a number (“-5” is “-” and “5”); keep “-” in the symbols above. A negative value here is turned into 0, and the largest number grows to its absolute value.",
     digitGroup: "How numbers become tokens",
     digitGroupHint:
       "Whole = one token per number. 1 / 2 / 3 = split numbers into digit groups, so large numbers reuse a tiny vocabulary. Spaces are not tokens, so with digit groups (calt 1.7 and later) the boundary between space-separated numbers is lost (“48 36” reads like “4 8 3 6”).",
@@ -314,13 +316,13 @@ export const en = {
     symbolsInfo:
       "List every operator or letter that can appear in your problems or answers. Numbers are set separately below. Anything you forget makes training stop with an error.",
     numMinInfo:
-      "The smallest (most negative) whole number your data can contain. Set it to cover every value your generator can produce.",
+      "The smallest (most negative) whole number your data can contain. Set it to cover every value your generator can produce. With the sign not attached, “-” is a separate symbol and this is 0 or more.",
     numMaxInfo:
-      "The largest whole number your data can contain. Together with the smallest, this sets the range of number tokens the model knows.",
+      "The largest whole number your data can contain. Together with the smallest, this sets the range of number tokens the model knows. With the sign not attached, use the largest absolute value (100 for numbers from -100 to 50).",
     digitGroupInfo:
       "“Whole” gives each number its own token: simple, but every number in your data must be inside the range above. Splitting into 1, 2 or 3-digit groups lets big numbers reuse a tiny vocabulary, at the cost of longer sequences. Spaces are not tokens, so with digit groups (calt 1.7 and later) “48 36” and “4 836” become the same tokens; use “Whole” when your problems or answers list several numbers separated by spaces.",
     attachSignInfo:
-      "On: a leading minus is part of the number, so “-5” is a single token (for signed values). Off: “-” is treated as a separate symbol, like a subtraction sign.",
+      "On: a leading minus is part of the number, so “-5” is a single token (for signed values). Off: “-” is treated as a separate symbol, like a subtraction sign, and a negative number becomes “-” followed by a number (“-5” is “-” then “5”), so the number range needs no negative values.",
     allowFloatInfo:
       "Turn on if your numbers can have a decimal point (e.g. 0.71). Leave it off if your data only uses whole numbers.",
   },

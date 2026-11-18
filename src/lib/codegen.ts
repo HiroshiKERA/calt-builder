@@ -64,6 +64,20 @@ export interface LexerConfig {
   strict: boolean;
 }
 
+/**
+ * With a separate sign (attach_sign: false) the number range is a range of
+ * magnitudes: "-" is its own symbol, so negative numbers are not needed in the
+ * vocabulary. They are also harmful there: calt (1.7.0) matches number tokens
+ * such as "-15" before the "-" symbol, so "-5" stays one token and an
+ * out-of-range "-150" silently becomes "-15", "0" instead of an error. So a
+ * negative lower bound becomes 0, and the upper bound grows to cover the
+ * magnitudes the old range allowed (-1000..10 -> 0..1000).
+ */
+export function normalizeLexerConfig(lx: LexerConfig): LexerConfig {
+  if (lx.attachSign || lx.numbersMin >= 0) return lx;
+  return { ...lx, numbersMin: 0, numbersMax: Math.max(-lx.numbersMin, lx.numbersMax) };
+}
+
 /** Default lexer config for a template (what the generator is expected to emit). */
 export function defaultLexerConfig(templateId: string, vals: ParamValues): LexerConfig {
   const lx = getTemplate(templateId).lexer(vals);
@@ -301,7 +315,7 @@ dataset:
 
 function lexerYaml(cfg: BuildConfig): string {
   // Use the user's edits when present, otherwise the template's default suggestion.
-  const lx = cfg.lexerOverride ?? defaultLexerConfig(cfg.templateId, cfg.paramValues);
+  const lx = normalizeLexerConfig(cfg.lexerOverride ?? defaultLexerConfig(cfg.templateId, cfg.paramValues));
   const numbersLine = `    numbers: ["", ${lx.numbersMin}, ${lx.numbersMax}]`;
   return `# Tokenizer vocabulary. Every symbol that can appear in an input OR output
 # string must be covered here. calt has no [UNK] token: a symbol missing here
