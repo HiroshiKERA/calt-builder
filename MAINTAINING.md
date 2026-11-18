@@ -189,16 +189,18 @@ the site pins it. Same dependencies as 1.6.1, no config keys renamed or removed.
     not apply): with -10..10, `x-12` -> `x`, `-1`, `2`, and even in range
     `3-5` -> `3`, `-5` (subtraction lost). With `allow_float`, even a 0..10
     range gives `x-0.5` -> `x`, `-0`, `0`, `.`, `5`.
-  - The example tasks do not hit it: gf17_addition and parity have no `-`
-    after a digit or letter, eigvec_3x3 puts `-` only first or after `,` `;`,
-    and the Sage strings of groebner_basis and polynomial_addition put spaces
-    around `-`. The PCA template puts negatives after a space.
-  The builder works around the separate-sign case: `normalizeLexerConfig`
-  (`codegen.ts`) writes a lower bound of 0 and widens the upper bound, the
-  tokenizer editor shows that range, and the "Start from scratch" template
-  defaults to 0..100. The attached-sign case needs the calt fix. Drop the
-  workaround once calt stops matching negative vocabulary tokens as reserved
-  tokens.
+  - The example tasks do not hit it: integer_factorization has no negative
+    tokens (0..1000, separate sign, no decimals), gf17_addition and parity
+    have no `-` after a digit or letter, eigvec_3x3 puts `-` only first or
+    after `,` `;`, and the Sage strings of groebner_basis and
+    polynomial_addition put spaces around `-`. The PCA template puts
+    negatives first or after a space.
+  - Workaround for the separate-sign case: `normalizeLexerConfig`
+    (`codegen.ts`) writes a lower bound of 0 and widens the upper bound, the
+    tokenizer editor shows that range, and the "Start from scratch" template
+    defaults to 0..100. The attached-sign case needs the calt fix. Drop the
+    workaround once calt stops matching negative vocabulary tokens as reserved
+    tokens.
 - **No `[UNK]` token.** A symbol missing from `lexer.yaml` stops training at the
   first batch that has it (`WordLevel error: Missing [UNK] token`, since the
   builder writes `validate_test_tokens: false`). The generated `lexer.yaml`
