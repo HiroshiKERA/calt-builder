@@ -165,6 +165,8 @@ the site pins it. Same dependencies as 1.6.1, no config keys renamed or removed.
   - In this mode 1.7.0 also reads `.5` as `0 . 5` with `allow_float: true` and
     no longer takes vocabulary tokens that start with a digit (such as `2x`)
     whole. No preset or template hits this; a user's tokenizer edits can.
+    Checked against 1.6.1's lexer: the other modes already matched numbers
+    first, so only this mode changed.
   - Projects downloaded before 2026-11-18 may have custom tasks with digit
     groups, so the recovery commands in `README.md` keep `calt-x==1.6.1`.
   - `PRETOK_VERSION` becomes `v2`, so groebner_basis's pre-tokenized caches
@@ -177,18 +179,28 @@ the site pins it. Same dependencies as 1.6.1, no config keys renamed or removed.
   build simply cannot reach the GPU, it suggests no command (check
   `nvidia-smi`, container passthrough). The generated README sends users to its
   check, whose cases cover all three (`projectReadme.ts`, "Messages you may see").
-- **Negative number tokens (calt bug, reported 2026-11-19, not fixed in 1.7.0).**
-  When the vocabulary range is negative, calt matches tokens such as `-15`
-  before the `-` symbol, so with a separate sign `-5` stays one token and an
-  out-of-range `-150` silently becomes `-15`, `0`. With an attached sign the
-  same happens right after a letter or digit: with -10..10, `x-12` -> `x`,
-  `-1`, `2`, and even in range `3-5` -> `3`, `-5` (subtraction lost). The
-  example tasks' Sage strings put spaces around `-`, so they do not hit this. The
-  builder works around the separate-sign case: `normalizeLexerConfig`
-  (`codegen.ts`) writes a lower bound of 0 and widens the upper bound, the
-  tokenizer editor shows that range, and the "Start from scratch" template
-  defaults to 0..100. Drop this once calt stops matching range tokens as
-  reserved tokens.
+- **Negative number tokens (calt bug, reported 2026-11-19; present in 1.6.1
+  and 1.7.0).** calt matches the vocabulary's negative number tokens before the
+  `-` symbol: those built from a negative range (`-15`), and `-0`, which it adds
+  when `attach_sign` and `allow_float` are both true. Effects:
+  - Separate sign, negative range: `-5` stays one token, and an out-of-range
+    `-150` silently becomes `-15`, `0` instead of an error.
+  - Attached sign, right after a letter or digit (where the number pattern does
+    not apply): with -10..10, `x-12` -> `x`, `-1`, `2`, and even in range
+    `3-5` -> `3`, `-5` (subtraction lost). With `allow_float`, even a 0..10
+    range gives `x-0.5` -> `x`, `-0`, `0`, `.`, `5`.
+  - The example tasks do not hit it: integer_factorization has no negative
+    tokens (0..1000, separate sign, no decimals), gf17_addition and parity
+    have no `-` after a digit or letter, eigvec_3x3 puts `-` only first or
+    after `,` `;`, and the Sage strings of groebner_basis and
+    polynomial_addition put spaces around `-`. The PCA template puts
+    negatives first or after a space.
+  - Workaround for the separate-sign case: `normalizeLexerConfig`
+    (`codegen.ts`) writes a lower bound of 0 and widens the upper bound, the
+    tokenizer editor shows that range, and the "Start from scratch" template
+    defaults to 0..100. The attached-sign case needs the calt fix. Drop the
+    workaround once calt stops matching negative vocabulary tokens as reserved
+    tokens.
 - **No `[UNK]` token.** A symbol missing from `lexer.yaml` stops training at the
   first batch that has it (`WordLevel error: Missing [UNK] token`, since the
   builder writes `validate_test_tokens: false`). The generated `lexer.yaml`
