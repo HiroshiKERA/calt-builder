@@ -180,8 +180,10 @@ the site pins it. Same dependencies as 1.6.1, no config keys renamed or removed.
 - **Negative number tokens (calt bug, reported 2026-11-19, not fixed in 1.7.0).**
   When the vocabulary range is negative, calt matches tokens such as `-15`
   before the `-` symbol, so with a separate sign `-5` stays one token and an
-  out-of-range `-150` silently becomes `-15`, `0` (with an attached sign the
-  same happens right after a letter or digit: `x-12` -> `x`, `-1`, `2`). The
+  out-of-range `-150` silently becomes `-15`, `0`. With an attached sign the
+  same happens right after a letter or digit: with -10..10, `x-12` -> `x`,
+  `-1`, `2`, and even in range `3-5` -> `3`, `-5` (subtraction lost). The
+  example tasks' Sage strings put spaces around `-`, so they do not hit this. The
   builder works around the separate-sign case: `normalizeLexerConfig`
   (`codegen.ts`) writes a lower bound of 0 and widens the upper bound, the
   tokenizer editor shows that range, and the "Start from scratch" template

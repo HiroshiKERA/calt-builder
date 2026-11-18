@@ -105,10 +105,10 @@ class ${cls}:
 
     The generator must be deterministic: the same seed always yields the same
     (problem, answer) pair. Both 'problem' and 'answer' are strings.
-    Keep every number within the tokenizer's range (-100..100 by default: the
-    minus sign is its own token, numbers 0..100), or widen the range on the
-    tokenizer screen. calt has no unknown token: a number outside the range
-    makes training stop with an error.
+    Keep every number within the tokenizer's range, or widen it on the
+    tokenizer screen. By default that is -100..100: the minus sign is its own
+    token and the screen shows numbers 0..100. calt has no unknown token: a
+    number outside the range makes training stop with an error.
     """
 
     def __init__(self):
