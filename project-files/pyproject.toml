@@ -12,7 +12,7 @@ dependencies = [
     # conda-forge PyTorch already there; do not pip install torch into that env,
     # pip's GPU build breaks `import calt` on many Linux systems
     # (CXXABI_1.3.15 not found). Outside conda, pip installs PyPI's torch.
-    "calt-x==1.6.1",
+    "calt-x==1.7.0",
     "omegaconf>=2.3.0",
     "matplotlib>=3.7.0",
     "click>=8.0.0",

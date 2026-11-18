@@ -300,7 +300,7 @@ export const en = {
   },
   lexer: {
     intro:
-      "Set the tokenizer to match the data your generator produces. Every symbol that can appear in the input or output must be listed here, or it becomes an unknown token.",
+      "Set the tokenizer to match the data your generator produces. Every symbol that can appear in the input or output must be listed here; a missing one makes training stop with an error.",
     symbols: "Symbols in your data",
     symbolsHint: "Space-separated. Include every operator/letter that appears, e.g. + - * ^ | x y",
     numMin: "Smallest number",
@@ -312,7 +312,7 @@ export const en = {
     attachSign: "Attach sign to numbers",
     allowFloat: "Allow decimals (e.g. 0.71)",
     symbolsInfo:
-      "List every operator or letter that can appear in your problems or answers. Numbers are set separately below. Anything you forget becomes an “unknown” token the model can't read.",
+      "List every operator or letter that can appear in your problems or answers. Numbers are set separately below. Anything you forget makes training stop with an error.",
     numMinInfo:
       "The smallest (most negative) whole number your data can contain. Set it to cover every value your generator can produce.",
     numMaxInfo:

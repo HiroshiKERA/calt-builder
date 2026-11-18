@@ -35,10 +35,10 @@ Transformer models on algebraic tasks. This app is the friendly front door to it
    ZIP. A copy-paste run guide (conda install + 3 commands) is included.
 
 The downloaded project installs SageMath and PyTorch with **conda** (conda-forge),
-then the engine `calt-x==1.6.1` with `pip`. calt-x 1.6.1 includes the
+then the engine `calt-x==1.7.0` with `pip`. calt-x 1.7.0 includes the
 `calt.io.preprocess` the tasks need, trains on transformers 5.15 or later (which a
 fresh `pip` install resolves), keeps `--dryrun` off W&B and really runs the
-`cosine` schedule.
+`cosine` schedule (both since 1.6.1).
 
 > **Downloaded a project whose README's `conda create` line has no `pytorch`** (or
 > that pins `calt-x==1.6.0` or older)? Two kinds of problems can show up:
@@ -69,7 +69,10 @@ fresh `pip` install resolves), keeps `--dryrun` off W&B and really runs the
 > Pascal, Volta) and cluster login nodes need
 > `CONDA_OVERRIDE_CUDA` in front of `conda create`; a newly downloaded project's
 > README explains when. If you install from the project's `pyproject.toml` (e.g. with uv), also change
-> its `calt-x==` line to `calt-x==1.6.1`. After the update, `cosine` really is a
+> its `calt-x==` line to `calt-x==1.6.1`. These commands keep `calt-x==1.6.1` on
+> purpose: projects downloaded before 2026-11-18 may have a custom task that
+> splits numbers into digit groups, and calt-x 1.7.0 splits those differently
+> (see MAINTAINING.md, *Changes in calt 1.7.0*). After the update, `cosine` really is a
 > cosine schedule, so the same config gives a different training curve than
 > before. If you trained with `lexer_expanded.yaml` (groebner_basis), the text
 > form of the zero polynomial changed (calt #64): delete the
@@ -110,7 +113,7 @@ Then review the diff in `src/generated/projectFiles.ts`, test a task, and commit
 re-vendors `task-sources/` from that remote, then bundles.)
 
 The engine version is defined in `src/lib/caltVersion.ts` (currently
-`calt-x==1.6.1` from PyPI). See **[MAINTAINING.md](MAINTAINING.md)** for how to bump it.
+`calt-x==1.7.0` from PyPI). See **[MAINTAINING.md](MAINTAINING.md)** for how to bump it.
 
 See [MAINTAINING.md](MAINTAINING.md) for the full maintenance workflow and
 [AI_CONTEXT.md](AI_CONTEXT.md) for a deep architectural description.

@@ -3,7 +3,7 @@ import type { TemplateId } from "../lib/templates";
 
 // Translation rule: Japanese by default; keep a term in English when there is no
 // established Japanese translation. Glossary (keep these consistent):
-// ジェネレータ, トークナイザ, トークン, 語彙, 未知トークン, 学習データ(の数),
+// ジェネレータ, トークナイザ, トークン, 語彙, 学習データ(の数),
 // サンプルタスク (example tasks only), 自分のタスク, エポック数, デフォルト,
 // 測定 / 統計, 位置埋め込み, 学習型 / 正弦波 / なし, エンコーダのみ / デコーダのみ,
 // エンコーダ・デコーダ, オンライン記録. Kept in English: Standard, Monomial, RoPE,
@@ -241,7 +241,7 @@ export const ja: Dict = {
   },
   lexer: {
     intro:
-      "ジェネレータが作るデータに合わせて、トークナイザを設定します。入力や出力に現れる記号は、すべてここに書いてください。ここにない記号は「未知トークン」として扱われます。",
+      "ジェネレータが作るデータに合わせて、トークナイザを設定します。入力や出力に現れる記号は、すべてここに書いてください。ここにない記号があると、学習がエラーで止まります。",
     symbols: "データに含まれる記号",
     symbolsHint: "スペース区切りで、現れる演算子や文字をすべて書いてください。例：+ - * ^ | x y",
     numMin: "最小の整数",
@@ -253,7 +253,7 @@ export const ja: Dict = {
     attachSign: "符号を数に含める",
     allowFloat: "小数を許可（例：0.71）",
     symbolsInfo:
-      "問題や答えに現れる演算子や文字を、すべて書いてください。数は下で別に設定します。書き忘れた記号は、モデルが読めない「未知トークン」になります。",
+      "問題や答えに現れる演算子や文字を、すべて書いてください。数は下で別に設定します。書き忘れた記号があると、学習がエラーで止まります。",
     numMinInfo:
       "データに現れる最小の整数です（負の数があれば、そのうち最も小さい値）。ジェネレータが作るすべての値が範囲に入るように設定してください。",
     numMaxInfo:

@@ -304,7 +304,8 @@ function lexerYaml(cfg: BuildConfig): string {
   const lx = cfg.lexerOverride ?? defaultLexerConfig(cfg.templateId, cfg.paramValues);
   const numbersLine = `    numbers: ["", ${lx.numbersMin}, ${lx.numbersMax}]`;
   return `# Tokenizer vocabulary. Every symbol that can appear in an input OR output
-# string must be covered here, otherwise it becomes an [UNK] token.
+# string must be covered here. calt has no [UNK] token: a symbol missing here
+# stops training with an error at the first batch (or evaluation) that has it.
 vocab:
   range:
 ${numbersLine}
